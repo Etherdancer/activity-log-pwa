@@ -17,16 +17,26 @@ export function ShareImportData({ user }: { user: User }) {
       
       const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
       const filename = `activity_log_${user.firstName}_${user.lastName}.json`;
+      const file = new File([blob], filename, { type: 'application/json' });
 
-      if (navigator.share && navigator.canShare && navigator.canShare({ files: [new File([blob], filename, { type: 'application/json' })] })) {
-        const file = new File([blob], filename, { type: 'application/json' });
-        await navigator.share({
-          files: [file],
-          title: 'Activity Log Export',
-          text: `Activity Log for ${user.firstName} ${user.lastName}`
-        });
-      } else {
-        // Fallback to download
+      let shared = false;
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({
+            files: [file],
+            title: 'Activity Log Export',
+            text: `Activity Log for ${user.firstName} ${user.lastName}`
+          });
+          shared = true;
+        } catch (shareError: any) {
+          // If user aborted the share sheet, don't show an error and don't fallback to download.
+          if (shareError.name === 'AbortError') return;
+          console.warn("Share API failed, falling back to download", shareError);
+        }
+      } 
+      
+      if (!shared) {
+        // Fallback to direct download
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -36,7 +46,7 @@ export function ShareImportData({ user }: { user: User }) {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
       }
-    } catch (e) {
+    } catch (e: any) {
       console.error("Export failed", e);
       alert(t('export_failed') || "Export failed");
     }

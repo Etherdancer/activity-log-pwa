@@ -2,12 +2,14 @@ import { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useTranslation } from 'react-i18next';
 import { db } from './db/database';
-import { UserSwitcher } from './components/UserSwitcher';
 import { ShareImportData } from './components/ShareImportData';
 import { WeeklyCalendar } from './components/WeeklyCalendar';
 import { PrintModal } from './components/PrintModal';
 import { PrintView } from './components/PrintView';
-import { Activity, Globe, LogOut, Printer } from 'lucide-react';
+import { UserDropdown } from './components/UserDropdown';
+import { CreateUserModal } from './components/CreateUserModal';
+import { CreateUser } from './components/CreateUser';
+import { Activity, Globe, Printer } from 'lucide-react';
 import './App.css';
 
 function App() {
@@ -16,9 +18,8 @@ function App() {
   const [activeUserId, setActiveUserId] = useState<number | null>(null);
 
   const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
+  const [isCreateUserModalOpen, setIsCreateUserModalOpen] = useState(false);
   const [printConfig, setPrintConfig] = useState<{ userId: number; startDate: string; endDate: string } | null>(null);
-
-  const activeUser = users?.find(u => u.id === activeUserId) || users?.[0];
 
   const handleLanguageToggle = () => {
     const newLang = i18n.language === 'hr' ? 'en' : 'hr';
@@ -45,8 +46,8 @@ function App() {
     return <div className="app-wrapper"><div className="empty-state">Loading...</div></div>;
   }
 
-  if (users.length === 0 || !activeUser || activeUserId === null) {
-    // Show UserSwitcher if no user selected or no users exist
+  if (users.length === 0) {
+    // Show CreateUser fullscreen if no users exist
     return (
       <div className="app-wrapper">
         <div className="top-nav no-print">
@@ -61,12 +62,17 @@ function App() {
           </div>
         </div>
         <div className="main-content">
-          <UserSwitcher 
-            onSelectUser={(id) => setActiveUserId(id)} 
-          />
+          <CreateUser onCreated={() => {}} />
         </div>
       </div>
     );
+  }
+
+  // Ensure an active user is selected
+  const activeUser = users.find(u => u.id === activeUserId) || users[0];
+
+  if (!activeUser) {
+    return null; // Fallback should never happen if users.length > 0
   }
 
   return (
@@ -78,7 +84,12 @@ function App() {
         </div>
         
         <div className="actions-section">
-          <span style={{ fontWeight: 500 }}>{activeUser.firstName} {activeUser.lastName}</span>
+          <UserDropdown 
+            users={users} 
+            activeUser={activeUser} 
+            onSelectUser={setActiveUserId} 
+            onAddUser={() => setIsCreateUserModalOpen(true)} 
+          />
           
           <ShareImportData user={activeUser} />
 
@@ -88,10 +99,6 @@ function App() {
           
           <button className="btn-secondary" onClick={handleLanguageToggle} title="Toggle Language">
             <Globe size={18} /> {i18n.language.toUpperCase()}
-          </button>
-
-          <button className="btn-secondary" onClick={() => setActiveUserId(null)} title={t('users')}>
-            <LogOut size={18} />
           </button>
         </div>
       </div>
@@ -104,6 +111,12 @@ function App() {
         isOpen={isPrintModalOpen}
         onClose={() => setIsPrintModalOpen(false)}
         onPrint={handlePrintRequest}
+      />
+
+      <CreateUserModal 
+        isOpen={isCreateUserModalOpen}
+        onClose={() => setIsCreateUserModalOpen(false)}
+        onCreated={() => {}}
       />
     </div>
   );
