@@ -112,6 +112,23 @@ export function ExportModal({ isOpen, onClose, user, activities }: ExportModalPr
 
             {mode === 'link' && (
               <div style={{ marginTop: '1rem' }}>
+                <div style={{ 
+                  backgroundColor: 'var(--bg-main)', 
+                  padding: '1rem', 
+                  borderRadius: 'var(--radius-md)',
+                  fontSize: '0.85rem',
+                  color: 'var(--text-muted)',
+                  marginBottom: '1rem',
+                  border: '1px solid var(--color-surface-200)'
+                }}>
+                  <p style={{ margin: '0 0 0.5rem 0', fontWeight: 600, color: 'var(--text-main)' }}>{t('export_limit_info')}</p>
+                  <ul style={{ margin: 0, paddingLeft: '1.2rem' }}>
+                    <li>{t('export_limit_ex_1')}</li>
+                    <li>{t('export_limit_ex_2')}</li>
+                    <li>{t('export_limit_ex_3')}</li>
+                  </ul>
+                </div>
+
                 {!generatedLink ? (
                   <button className="btn-primary" onClick={(e) => { e.stopPropagation(); handleGenerateLink(); }} style={{ width: '100%' }}>
                     {t('generate_link')}
@@ -157,6 +174,20 @@ export function ExportModal({ isOpen, onClose, user, activities }: ExportModalPr
 
             {mode === 'file' && (
               <div style={{ marginTop: '1rem' }}>
+                <div style={{ 
+                  backgroundColor: 'var(--color-primary-50)', 
+                  padding: '1rem', 
+                  borderRadius: 'var(--radius-md)',
+                  fontSize: '0.85rem',
+                  color: 'var(--color-primary-800)',
+                  marginBottom: '1rem',
+                  border: '1px solid var(--color-primary-200)',
+                  display: 'flex',
+                  gap: '0.5rem'
+                }}>
+                  <Info size={16} style={{ flexShrink: 0, marginTop: '2px' }} />
+                  <span>{t('export_limit_file_pref')}</span>
+                </div>
                 <button className="btn-primary" onClick={(e) => { e.stopPropagation(); handleFileExport(); }} style={{ width: '100%' }}>
                   <FileJson size={18} /> {t('generate_file')}
                 </button>
