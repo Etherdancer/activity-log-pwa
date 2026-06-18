@@ -60,19 +60,42 @@ export function ExportModal({ isOpen, onClose, user, activities }: ExportModalPr
     }
   };
 
-  const handleFileExport = () => {
+  const downloadFile = (file: File, filename: string) => {
+    const url = URL.createObjectURL(file);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleFileExport = async () => {
     try {
-      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+      const jsonString = JSON.stringify(exportData, null, 2);
       const filename = `activity_log_${user.firstName}_${user.lastName}.json`;
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      onClose();
+      const file = new File([jsonString], filename, { type: 'application/json' });
+
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({
+            files: [file],
+            title: 'Exported Data',
+            text: `Activity Log data for ${user.firstName} ${user.lastName}`
+          });
+          onClose();
+          return;
+        } catch (e: any) {
+          if (e.name !== 'AbortError') {
+            downloadFile(file, filename);
+            onClose();
+          }
+        }
+      } else {
+        downloadFile(file, filename);
+        onClose();
+      }
     } catch (e) {
       console.error(e);
       alert(t('export_failed'));
@@ -189,7 +212,7 @@ export function ExportModal({ isOpen, onClose, user, activities }: ExportModalPr
                   <span>{t('export_limit_file_pref')}</span>
                 </div>
                 <button className="btn-primary" onClick={(e) => { e.stopPropagation(); handleFileExport(); }} style={{ width: '100%' }}>
-                  <FileJson size={18} /> {t('generate_file')}
+                  <FileJson size={18} /> {t('share_file') || t('generate_file')}
                 </button>
               </div>
             )}
