@@ -1,8 +1,8 @@
 .app-wrapper {
   display: flex;
   flex-direction: column;
-  height: 100dvh; /* use dvh for mobile browsers */
   height: 100%; /* fallback */
+  height: 100dvh; /* use dvh for mobile browsers */
   background-color: var(--bg-main);
   overflow: hidden;
 }
@@ -35,6 +35,7 @@
 
 .main-content {
   flex: 1;
+  min-height: 0; /* Ensures flex child can shrink and allows internal scrolling */
   overflow: hidden;
   display: flex;
   flex-direction: column;
