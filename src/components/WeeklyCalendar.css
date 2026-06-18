@@ -126,6 +126,8 @@
   transition: background-color var(--transition-fast);
   position: relative;
   padding: 2px;
+  padding-bottom: 24px; /* Ensure space at bottom for adding new items */
+  overflow-y: auto;
 }
 
 .hour-cell:hover {
@@ -139,9 +141,40 @@
   font-size: 0.75rem;
   padding: 0.25rem 0.5rem;
   border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 2px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.activity-item:hover {
+  background-color: var(--color-primary-600);
+}
+
+.activity-text {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  box-shadow: var(--shadow-sm);
-  margin-bottom: 2px;
+  flex: 1;
+}
+
+.delete-activity-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border-radius: 50%;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.delete-activity-btn:hover {
+  background: rgba(0, 0, 0, 0.2);
+  color: white;
 }

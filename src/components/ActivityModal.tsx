@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react';
-import { db } from '../db/database';
+import { db, type Activity } from '../db/database';
 import { format } from 'date-fns';
 import './ActivityModal.css';
 
@@ -11,9 +11,10 @@ interface ActivityModalProps {
   userId: number;
   initialDate: string; // yyyy-MM-dd
   initialTime: string; // HH:mm
+  editingActivity?: Activity | null;
 }
 
-export function ActivityModal({ isOpen, onClose, userId, initialDate, initialTime }: ActivityModalProps) {
+export function ActivityModal({ isOpen, onClose, userId, initialDate, initialTime, editingActivity }: ActivityModalProps) {
   const { t } = useTranslation();
   const [date, setDate] = useState(initialDate);
   const [time, setTime] = useState(initialTime);
@@ -22,11 +23,17 @@ export function ActivityModal({ isOpen, onClose, userId, initialDate, initialTim
   // Reset state when modal opens
   useEffect(() => {
     if (isOpen) {
-      setDate(initialDate);
-      setTime(initialTime);
-      setDescription('');
+      if (editingActivity) {
+        setDate(editingActivity.date);
+        setTime(editingActivity.startTime);
+        setDescription(editingActivity.description);
+      } else {
+        setDate(initialDate);
+        setTime(initialTime);
+        setDescription('');
+      }
     }
-  }, [isOpen, initialDate, initialTime]);
+  }, [isOpen, initialDate, initialTime, editingActivity]);
 
   if (!isOpen) return null;
 
@@ -40,14 +47,23 @@ export function ActivityModal({ isOpen, onClose, userId, initialDate, initialTim
     if (!description.trim()) return;
 
     try {
-      await db.activities.add({
-        id: crypto.randomUUID(),
-        userId,
-        date,
-        startTime: time,
-        description: description.trim(),
-        createdAt: Date.now()
-      });
+      if (editingActivity) {
+        await db.activities.put({
+          ...editingActivity,
+          date,
+          startTime: time,
+          description: description.trim()
+        });
+      } else {
+        await db.activities.add({
+          id: crypto.randomUUID(),
+          userId,
+          date,
+          startTime: time,
+          description: description.trim(),
+          createdAt: Date.now()
+        });
+      }
       onClose();
     } catch (e) {
       console.error("Error saving activity", e);
@@ -58,7 +74,7 @@ export function ActivityModal({ isOpen, onClose, userId, initialDate, initialTim
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
-          <h3>{t('add_activity')}</h3>
+          <h3>{editingActivity ? t('edit_activity') : t('add_activity')}</h3>
           <button className="close-btn" onClick={onClose}>
             <X size={20} />
           </button>

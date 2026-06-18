@@ -9,7 +9,7 @@ import {
   addWeeks 
 } from 'date-fns';
 import { hr, enUS } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import type { User } from '../db/database';
 import { db } from '../db/database';
@@ -24,6 +24,7 @@ export function WeeklyCalendar({ user }: { user: User }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalInitialDate, setModalInitialDate] = useState('');
   const [modalInitialTime, setModalInitialTime] = useState('');
+  const [editingActivity, setEditingActivity] = useState<any>(null);
 
   const locale = i18n.language === 'hr' ? hr : enUS;
 
@@ -95,14 +96,40 @@ export function WeeklyCalendar({ user }: { user: User }) {
                       key={`${dateStr}-${hour}`} 
                       className="hour-cell"
                       onClick={() => {
+                        setEditingActivity(null);
                         setModalInitialDate(dateStr);
                         setModalInitialTime(`${hourStr}:00`);
                         setIsModalOpen(true);
                       }}
                     >
                       {actsInHour.map(act => (
-                        <div key={act.id} className="activity-item" title={act.description}>
-                          {act.startTime} {act.description}
+                        <div 
+                          key={act.id} 
+                          className="activity-item" 
+                          title={act.description}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditingActivity(act);
+                            setModalInitialDate(act.date);
+                            setModalInitialTime(act.startTime);
+                            setIsModalOpen(true);
+                          }}
+                        >
+                          <span className="activity-text">
+                            {act.startTime} {act.description}
+                          </span>
+                          <button 
+                            className="delete-activity-btn"
+                            title={t('delete_activity')}
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              if (window.confirm(t('delete_activity') + '?')) {
+                                await db.activities.delete(act.id);
+                              }
+                            }}
+                          >
+                            <X size={12} />
+                          </button>
                         </div>
                       ))}
                     </div>
@@ -120,6 +147,7 @@ export function WeeklyCalendar({ user }: { user: User }) {
         userId={user.id!}
         initialDate={modalInitialDate}
         initialTime={modalInitialTime}
+        editingActivity={editingActivity}
       />
     </div>
   );
