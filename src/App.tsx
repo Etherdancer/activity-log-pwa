@@ -1,122 +1,79 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useState } from 'react';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { useTranslation } from 'react-i18next';
+import { db, User } from './db/database';
+import { CreateUser } from './components/CreateUser';
+import { WeeklyCalendar } from './components/WeeklyCalendar';
+import { Activity, Download, Globe, LogOut } from 'lucide-react';
+import './App.css';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const { t, i18n } = useTranslation();
+  const users = useLiveQuery(() => db.users.toArray());
+  const [activeUserId, setActiveUserId] = useState<number | null>(null);
+
+  const activeUser = users?.find(u => u.id === activeUserId) || users?.[0];
+
+  const handleLanguageToggle = () => {
+    const newLang = i18n.language === 'hr' ? 'en' : 'hr';
+    i18n.changeLanguage(newLang);
+  };
+
+  if (users === undefined) {
+    return <div className="app-wrapper"><div className="empty-state">Loading...</div></div>;
+  }
+
+  if (users.length === 0 || !activeUser) {
+    return (
+      <div className="app-wrapper">
+        <div className="top-nav">
+          <div className="title-section">
+            <Activity className="text-primary" />
+            {t('app_title')}
+          </div>
+          <div className="actions-section">
+            <button className="btn-secondary" onClick={handleLanguageToggle} title="Toggle Language">
+              <Globe size={18} /> {i18n.language.toUpperCase()}
+            </button>
+          </div>
+        </div>
+        <div className="main-content">
+          <CreateUser onCreated={() => {}} />
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
+    <div className="app-wrapper">
+      <div className="top-nav">
+        <div className="title-section">
+          <Activity className="text-primary" />
+          {t('app_title')}
         </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+        
+        <div className="actions-section">
+          <span>{activeUser.firstName} {activeUser.lastName}</span>
+          
+          <button className="btn-secondary" title={t('export_data')}>
+            <Download size={18} />
+          </button>
+          
+          <button className="btn-secondary" onClick={handleLanguageToggle} title="Toggle Language">
+            <Globe size={18} /> {i18n.language.toUpperCase()}
+          </button>
 
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
+          <button className="btn-secondary" onClick={() => setActiveUserId(null)} title="Switch User">
+            <LogOut size={18} />
+          </button>
         </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+      </div>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+      <div className="main-content">
+        <WeeklyCalendar user={activeUser} />
+      </div>
+    </div>
+  );
 }
 
-export default App
+export default App;
