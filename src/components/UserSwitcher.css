@@ -1,0 +1,51 @@
+.user-switcher-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 1rem;
+}
+
+.user-switcher-card {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.user-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.user-btn {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-50);
+  border: 1px solid var(--color-surface-200);
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-main);
+  transition: all var(--transition-fast);
+}
+
+.user-btn:hover {
+  background-color: var(--color-primary-50);
+  border-color: var(--color-primary-200);
+  color: var(--color-primary-700);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.new-user-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}

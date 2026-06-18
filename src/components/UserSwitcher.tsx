@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { db, type User } from '../db/database';
+import { db } from '../db/database';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { CreateUser } from './CreateUser';
 import { Users, User as UserIcon, Plus } from 'lucide-react';

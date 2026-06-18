@@ -2,9 +2,10 @@ import { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useTranslation } from 'react-i18next';
 import { db } from './db/database';
-import { CreateUser } from './components/CreateUser';
+import { UserSwitcher } from './components/UserSwitcher';
+import { ShareImportData } from './components/ShareImportData';
 import { WeeklyCalendar } from './components/WeeklyCalendar';
-import { Activity, Download, Globe, LogOut } from 'lucide-react';
+import { Activity, Globe, LogOut, Printer } from 'lucide-react';
 import './App.css';
 
 function App() {
@@ -19,14 +20,19 @@ function App() {
     i18n.changeLanguage(newLang);
   };
 
+  const handlePrint = () => {
+    window.print();
+  };
+
   if (users === undefined) {
     return <div className="app-wrapper"><div className="empty-state">Loading...</div></div>;
   }
 
-  if (users.length === 0 || !activeUser) {
+  if (users.length === 0 || !activeUser || activeUserId === null) {
+    // Show UserSwitcher if no user selected or no users exist
     return (
       <div className="app-wrapper">
-        <div className="top-nav">
+        <div className="top-nav no-print">
           <div className="title-section">
             <Activity className="text-primary" />
             {t('app_title')}
@@ -38,7 +44,9 @@ function App() {
           </div>
         </div>
         <div className="main-content">
-          <CreateUser onCreated={() => {}} />
+          <UserSwitcher 
+            onSelectUser={(id) => setActiveUserId(id)} 
+          />
         </div>
       </div>
     );
@@ -46,30 +54,32 @@ function App() {
 
   return (
     <div className="app-wrapper">
-      <div className="top-nav">
+      <div className="top-nav no-print">
         <div className="title-section">
           <Activity className="text-primary" />
           {t('app_title')}
         </div>
         
         <div className="actions-section">
-          <span>{activeUser.firstName} {activeUser.lastName}</span>
+          <span style={{ fontWeight: 500 }}>{activeUser.firstName} {activeUser.lastName}</span>
           
-          <button className="btn-secondary" title={t('export_data')}>
-            <Download size={18} />
+          <ShareImportData user={activeUser} />
+
+          <button className="btn-secondary" onClick={handlePrint} title={t('print')}>
+            <Printer size={18} />
           </button>
           
           <button className="btn-secondary" onClick={handleLanguageToggle} title="Toggle Language">
             <Globe size={18} /> {i18n.language.toUpperCase()}
           </button>
 
-          <button className="btn-secondary" onClick={() => setActiveUserId(null)} title="Switch User">
+          <button className="btn-secondary" onClick={() => setActiveUserId(null)} title={t('users')}>
             <LogOut size={18} />
           </button>
         </div>
       </div>
 
-      <div className="main-content">
+      <div className="main-content printable-content">
         <WeeklyCalendar user={activeUser} />
       </div>
     </div>
