@@ -9,6 +9,7 @@ import { PrintView } from './components/PrintView';
 import { UserDropdown } from './components/UserDropdown';
 import { CreateUserModal } from './components/CreateUserModal';
 import { CreateUser } from './components/CreateUser';
+import { PrivacyNotice } from './components/PrivacyNotice';
 import { Activity, Globe, Printer } from 'lucide-react';
 import './App.css';
 
@@ -64,6 +65,7 @@ function App() {
         <div className="main-content">
           <CreateUser onCreated={() => {}} />
         </div>
+        <PrivacyNotice />
       </div>
     );
   }
@@ -118,6 +120,8 @@ function App() {
         onClose={() => setIsCreateUserModalOpen(false)}
         onCreated={() => {}}
       />
+
+      <PrivacyNotice />
     </div>
   );
 }

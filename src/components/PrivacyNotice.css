@@ -1,0 +1,61 @@
+.privacy-notice-overlay {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: var(--color-surface-900);
+  color: #ffffff;
+  padding: 1rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  z-index: 1000;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.15);
+  animation: slideUp 0.3s ease-out;
+}
+
+@media (min-width: 768px) {
+  .privacy-notice-overlay {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.privacy-notice-text {
+  flex: 1;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--color-surface-200);
+}
+
+.privacy-notice-icon {
+  color: var(--color-primary-400);
+  margin-right: 0.5rem;
+  vertical-align: middle;
+}
+
+.privacy-notice-btn {
+  background-color: var(--color-primary-500);
+  color: white;
+  border: none;
+  padding: 0.6rem 1.5rem;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color var(--transition-fast);
+}
+
+.privacy-notice-btn:hover {
+  background-color: var(--color-primary-600);
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}

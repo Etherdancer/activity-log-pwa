@@ -30,7 +30,9 @@ const resources = {
       "thursday": "Četvrtak",
       "friday": "Petak",
       "saturday": "Subota",
-      "sunday": "Nedjelja"
+      "sunday": "Nedjelja",
+      "privacy_notice": "Ova aplikacija pohranjuje sve podatke isključivo lokalno na vašem uređaju. Ne prikupljamo, ne obrađujemo i ne šaljemo vaše podatke na nikakve poslužitelje ili trećim stranama. Vaši podaci se dijele isključivo kada vi eksplicitno koristite funkciju izvoza ili dijeljenja.",
+      "privacy_accept": "Razumijem"
     }
   },
   en: {
@@ -60,7 +62,9 @@ const resources = {
       "thursday": "Thursday",
       "friday": "Friday",
       "saturday": "Saturday",
-      "sunday": "Sunday"
+      "sunday": "Sunday",
+      "privacy_notice": "This app stores all data locally on your device. We do not collect, process, or send your data to any servers or third parties. Data is only shared when you explicitly use the export/share function.",
+      "privacy_accept": "I understand"
     }
   }
 };
