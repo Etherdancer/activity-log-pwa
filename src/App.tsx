@@ -19,15 +19,15 @@ function App() {
 
   const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
   const [isCreateUserModalOpen, setIsCreateUserModalOpen] = useState(false);
-  const [printConfig, setPrintConfig] = useState<{ userId: number; startDate: string; endDate: string } | null>(null);
+  const [printConfig, setPrintConfig] = useState<{ userId: number; startDate: string; endDate: string; isEmptyTemplate?: boolean } | null>(null);
 
   const handleLanguageToggle = () => {
     const newLang = i18n.language === 'hr' ? 'en' : 'hr';
     i18n.changeLanguage(newLang);
   };
 
-  const handlePrintRequest = (userId: number, startDate: string, endDate: string) => {
-    setPrintConfig({ userId, startDate, endDate });
+  const handlePrintRequest = (userId: number, startDate: string, endDate: string, isEmptyTemplate: boolean) => {
+    setPrintConfig({ userId, startDate, endDate, isEmptyTemplate });
   };
 
   if (printConfig) {

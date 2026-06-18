@@ -8,7 +8,7 @@ import { format, startOfWeek, endOfWeek } from 'date-fns';
 interface PrintModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onPrint: (userId: number, startDate: string, endDate: string) => void;
+  onPrint: (userId: number, startDate: string, endDate: string, isEmptyTemplate: boolean) => void;
 }
 
 export function PrintModal({ isOpen, onClose, onPrint }: PrintModalProps) {
@@ -18,12 +18,14 @@ export function PrintModal({ isOpen, onClose, onPrint }: PrintModalProps) {
   const [selectedUserId, setSelectedUserId] = useState<number | ''>('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [isEmptyTemplate, setIsEmptyTemplate] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
       const now = new Date();
       setStartDate(format(startOfWeek(now, { weekStartsOn: 1 }), 'yyyy-MM-dd'));
       setEndDate(format(endOfWeek(now, { weekStartsOn: 1 }), 'yyyy-MM-dd'));
+      setIsEmptyTemplate(false);
       if (users.length > 0 && selectedUserId === '') {
         setSelectedUserId(users[0].id!);
       }
@@ -33,8 +35,8 @@ export function PrintModal({ isOpen, onClose, onPrint }: PrintModalProps) {
   if (!isOpen) return null;
 
   const handlePrint = () => {
-    if (selectedUserId === '' || !startDate || !endDate) return;
-    onPrint(Number(selectedUserId), startDate, endDate);
+    if ((selectedUserId === '' && !isEmptyTemplate) || !startDate || !endDate) return;
+    onPrint(Number(selectedUserId) || 0, startDate, endDate, isEmptyTemplate);
     onClose();
   };
 
@@ -49,19 +51,33 @@ export function PrintModal({ isOpen, onClose, onPrint }: PrintModalProps) {
         </div>
 
         <div className="modal-body">
-          <div className="form-group">
-            <label>{t('users')}</label>
-            <select 
-              value={selectedUserId} 
-              onChange={e => setSelectedUserId(Number(e.target.value))}
-              style={{ padding: '0.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-surface-300)' }}
-            >
-              <option value="" disabled>Select User</option>
-              {users.map(u => (
-                <option key={u.id} value={u.id}>{u.firstName} {u.lastName}</option>
-              ))}
-            </select>
+          <div className="form-group" style={{ flexDirection: 'row', alignItems: 'center', gap: '0.5rem' }}>
+            <input 
+              type="checkbox" 
+              id="emptyTemplate" 
+              checked={isEmptyTemplate} 
+              onChange={e => setIsEmptyTemplate(e.target.checked)} 
+            />
+            <label htmlFor="emptyTemplate" style={{ margin: 0, cursor: 'pointer' }}>
+              Print empty template
+            </label>
           </div>
+
+          {!isEmptyTemplate && (
+            <div className="form-group">
+              <label>{t('users')}</label>
+              <select 
+                value={selectedUserId} 
+                onChange={e => setSelectedUserId(Number(e.target.value))}
+                style={{ padding: '0.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-surface-300)' }}
+              >
+                <option value="" disabled>Select User</option>
+                {users.map(u => (
+                  <option key={u.id} value={u.id}>{u.firstName} {u.lastName}</option>
+                ))}
+              </select>
+            </div>
+          )}
 
           <div className="datetime-row">
             <div className="form-group">
@@ -77,7 +93,7 @@ export function PrintModal({ isOpen, onClose, onPrint }: PrintModalProps) {
 
         <div className="modal-footer">
           <button className="btn-secondary" onClick={onClose}>{t('cancel')}</button>
-          <button className="btn-primary" onClick={handlePrint} disabled={selectedUserId === '' || !startDate || !endDate}>
+          <button className="btn-primary" onClick={handlePrint} disabled={(selectedUserId === '' && !isEmptyTemplate) || !startDate || !endDate}>
             {t('print')}
           </button>
         </div>

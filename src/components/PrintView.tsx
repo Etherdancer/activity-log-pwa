@@ -14,7 +14,7 @@ import { db } from '../db/database';
 import './WeeklyCalendar.css'; // Reuse calendar styles
 
 interface PrintViewProps {
-  config: { userId: number; startDate: string; endDate: string };
+  config: { userId: number; startDate: string; endDate: string; isEmptyTemplate?: boolean };
   onReady: () => void;
 }
 
@@ -37,7 +37,7 @@ export function PrintView({ config, onReady }: PrintViewProps) {
   }, [config.startDate, config.endDate]);
 
   // Fetch all activities in range
-  const activities = useLiveQuery(
+  const fetchedActivities = useLiveQuery(
     () => db.activities
       .where('[userId+date]')
       .between([config.userId, config.startDate], [config.userId, config.endDate], true, true)
@@ -45,18 +45,20 @@ export function PrintView({ config, onReady }: PrintViewProps) {
     [config.userId, config.startDate, config.endDate]
   );
 
+  const activities = config.isEmptyTemplate ? [] : (fetchedActivities || []);
+
   useEffect(() => {
-    // When user and activities are fully loaded, trigger onReady
-    if (user !== undefined && activities !== undefined) {
+    // When user (if needed) and activities are fully loaded, trigger onReady
+    if ((config.isEmptyTemplate || user !== undefined) && (config.isEmptyTemplate || fetchedActivities !== undefined)) {
       // Small timeout to ensure DOM is updated before print
       const timer = setTimeout(() => {
         onReady();
       }, 500);
       return () => clearTimeout(timer);
     }
-  }, [user, activities, onReady]);
+  }, [user, fetchedActivities, config.isEmptyTemplate, onReady]);
 
-  if (!user || !activities) {
+  if ((!user && !config.isEmptyTemplate) || (!fetchedActivities && !config.isEmptyTemplate)) {
     return <div className="printable-content">Loading print view...</div>;
   }
 
@@ -70,7 +72,7 @@ export function PrintView({ config, onReady }: PrintViewProps) {
         return (
           <div key={idx} className="print-page" style={{ pageBreakAfter: 'always', marginBottom: '2rem' }}>
             <div className="calendar-header">
-              <h2>{user.firstName} {user.lastName} - {t('week_of')} {format(weekStart, 'PP', { locale })}</h2>
+              <h2>{config.isEmptyTemplate ? t('app_title') : `${user?.firstName} ${user?.lastName}`} - {t('week_of')} {format(weekStart, 'PP', { locale })}</h2>
             </div>
             
             <div className="calendar-grid-wrapper">
