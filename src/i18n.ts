@@ -56,7 +56,13 @@ const resources = {
       "reset_app": "Obriši sve podatke",
       "reset_confirm_1": "Želite li izbrisati sve podatke s ovog uređaja?",
       "reset_confirm_2": "Jeste li sigurni? Ne postoje nikakve sigurnosne kopije na internetu i podaci će biti trajno izgubljeni.",
-      "delete_user_confirm": "Jeste li sigurni da želite obrisati ovog korisnika i sve njegove aktivnosti?"
+      "delete_user_confirm": "Jeste li sigurni da želite obrisati ovog korisnika i sve njegove aktivnosti?",
+      "import_conflict_title": "Pronađena su preklapanja",
+      "import_conflict_desc": "Pronašli smo {{count}} aktivnosti koje se vremenski preklapaju (ali se razlikuju po sadržaju) s vašim postojećim podacima. Kako želite riješiti ova preklapanja?",
+      "conflict_keep_device": "Zadrži postojeće podatke na uređaju (Zanemari uvezene)",
+      "conflict_keep_imported": "Zadrži nove uvezene podatke (Prepiši stare)",
+      "conflict_merge": "Zadrži oboje (Zasebne aktivnosti)",
+      "importing_data": "Uvoz podataka..."
     }
   },
   en: {
@@ -118,7 +124,13 @@ const resources = {
       "reset_app": "Clear All Data",
       "reset_confirm_1": "Do you want to delete all data from this device?",
       "reset_confirm_2": "Are you sure? There are no cloud backups anywhere and data will be permanently lost.",
-      "delete_user_confirm": "Are you sure you want to delete this user and all their activities?"
+      "delete_user_confirm": "Are you sure you want to delete this user and all their activities?",
+      "import_conflict_title": "Overlaps Found",
+      "import_conflict_desc": "We found {{count}} activities that overlap in time (but differ in content) with your existing device data. How would you like to resolve them?",
+      "conflict_keep_device": "Keep existing device data (Ignore imported)",
+      "conflict_keep_imported": "Keep imported data (Overwrite existing)",
+      "conflict_merge": "Keep both (Separate activities)",
+      "importing_data": "Importing data..."
     }
   }
 };
