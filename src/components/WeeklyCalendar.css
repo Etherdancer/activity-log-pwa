@@ -178,3 +178,37 @@
   background: rgba(0, 0, 0, 0.2);
   color: white;
 }
+
+/* Mobile Responsive Adjustments */
+@media (max-width: 768px) {
+  .calendar-header h2 {
+    font-size: 1.1rem;
+  }
+  
+  .calendar-header {
+    padding: 0.75rem;
+  }
+
+  .time-slot {
+    height: 45px; /* smaller fields to see more */
+    font-size: 0.7rem;
+    padding-top: 0.25rem;
+  }
+
+  .hour-cell {
+    height: 45px;
+    padding-bottom: 16px;
+  }
+
+  .time-header, .day-header {
+    height: 40px;
+  }
+  
+  .day-header .date-num {
+    font-size: 1rem;
+  }
+
+  .day-header .day-name {
+    font-size: 0.65rem;
+  }
+}
