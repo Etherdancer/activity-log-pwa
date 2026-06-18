@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { User } from '../db/database';
+import type { User } from '../db/database';
 
 export function WeeklyCalendar({ user }: { user: User }) {
   const { t } = useTranslation();

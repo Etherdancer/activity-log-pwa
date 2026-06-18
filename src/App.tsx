@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useTranslation } from 'react-i18next';
-import { db, User } from './db/database';
+import { db } from './db/database';
+import type { User } from './db/database';
 import { CreateUser } from './components/CreateUser';
 import { WeeklyCalendar } from './components/WeeklyCalendar';
 import { Activity, Download, Globe, LogOut } from 'lucide-react';
