@@ -71,8 +71,24 @@ export function PrintView({ config, onReady }: PrintViewProps) {
         
         return (
           <div key={idx} className="print-page" style={{ pageBreakAfter: 'always', marginBottom: '2rem' }}>
-            <div className="calendar-header">
-              <h2>{config.isEmptyTemplate ? t('app_title') : `${user?.firstName} ${user?.lastName}`} - {t('week_of')} {format(weekStart, 'PP', { locale })}</h2>
+            <div className="calendar-header" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginBottom: config.isEmptyTemplate ? '1rem' : '0' }}>
+                <h2>{config.isEmptyTemplate ? t('app_title') : `${user?.firstName} ${user?.lastName}`}</h2>
+                <h2>{t('week_of')} {format(weekStart, 'PP', { locale })}</h2>
+              </div>
+              
+              {config.isEmptyTemplate && (
+                <div style={{ display: 'flex', gap: '2rem', width: '100%', marginTop: '0.5rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-end', flex: 1 }}>
+                    <span style={{ fontWeight: 600, marginRight: '0.5rem', color: 'var(--text-main)' }}>{t('first_name')}:</span>
+                    <div style={{ borderBottom: '1px solid var(--text-main)', flex: 1, height: '1.5rem' }}></div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'flex-end', flex: 1 }}>
+                    <span style={{ fontWeight: 600, marginRight: '0.5rem', color: 'var(--text-main)' }}>{t('last_name')}:</span>
+                    <div style={{ borderBottom: '1px solid var(--text-main)', flex: 1, height: '1.5rem' }}></div>
+                  </div>
+                </div>
+              )}
             </div>
             
             <div className="calendar-grid-wrapper">
