@@ -194,12 +194,23 @@ button {
   }
 
   .calendar-grid-wrapper {
-    overflow: visible;
+    overflow: visible !important;
   }
 
   .calendar-grid {
-    min-width: 100%;
-    /* Ensure it fits exactly on the page width */
+    min-width: auto;
+  }
+
+  .hour-cell {
+    height: auto !important;
+    min-height: 40px;
+    overflow: visible !important;
+    padding-bottom: 2px !important;
+  }
+
+  .print-page {
+    page-break-after: always;
+    break-after: page;
   }
 
   .calendar-header {

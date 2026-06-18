@@ -70,7 +70,7 @@ export function PrintView({ config, onReady }: PrintViewProps) {
         const weekDays = Array.from({ length: 7 }).map((_, i) => addDays(weekStart, i));
         
         return (
-          <div key={idx} className="print-page" style={{ pageBreakAfter: 'always', marginBottom: '2rem' }}>
+          <div key={idx} className="print-page" style={{ pageBreakAfter: 'always', breakAfter: 'page', marginBottom: '2rem' }}>
             <div className="calendar-header" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginBottom: config.isEmptyTemplate ? '1rem' : '0' }}>
                 <h2>{config.isEmptyTemplate ? t('app_title') : `${user?.firstName} ${user?.lastName}`}</h2>
