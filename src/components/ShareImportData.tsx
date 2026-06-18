@@ -66,11 +66,11 @@ export function ShareImportData({ user }: { user: User }) {
     <>
       <div style={{ display: 'flex', gap: '0.5rem' }}>
         <button className="btn-secondary" title={t('export_data')} onClick={() => setIsExportModalOpen(true)}>
-          <Download size={18} />
+          <Upload size={18} />
         </button>
         
         <button className="btn-secondary" title={t('import_data')} onClick={() => fileInputRef.current?.click()}>
-          <Upload size={18} />
+          <Download size={18} />
         </button>
         
         <input 
