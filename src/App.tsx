@@ -11,7 +11,7 @@ import { CreateUserModal } from './components/CreateUserModal';
 import { CreateUser } from './components/CreateUser';
 import { PrivacyNotice } from './components/PrivacyNotice';
 import { ImportLinkModal } from './components/ImportLinkModal';
-import { Activity, Globe, Printer } from 'lucide-react';
+import { Activity, Globe, Printer, Trash2 } from 'lucide-react';
 import './App.css';
 
 function App() {
@@ -30,6 +30,21 @@ function App() {
 
   const handlePrintRequest = (userId: number, startDate: string, endDate: string, isEmptyTemplate: boolean) => {
     setPrintConfig({ userId, startDate, endDate, isEmptyTemplate });
+  };
+
+  const handleResetData = async () => {
+    if (window.confirm(t('reset_confirm_1'))) {
+      if (window.confirm(t('reset_confirm_2'))) {
+        try {
+          db.close();
+          await db.delete();
+          window.location.href = window.location.origin + window.location.pathname; // Clean reload
+        } catch (e) {
+          console.error("Failed to delete database", e);
+          alert("Failed to clear data.");
+        }
+      }
+    }
   };
 
   if (printConfig) {
@@ -58,6 +73,9 @@ function App() {
             {t('app_title')}
           </div>
           <div className="actions-section">
+            <button className="btn-secondary" onClick={handleResetData} title={t('reset_app')} style={{ color: 'var(--color-danger)' }}>
+              <Trash2 size={18} />
+            </button>
             <button className="btn-secondary" onClick={handleLanguageToggle} title="Toggle Language">
               <Globe size={18} /> {i18n.language.toUpperCase()}
             </button>
@@ -103,6 +121,10 @@ function App() {
           
           <button className="btn-secondary" onClick={handleLanguageToggle} title="Toggle Language">
             <Globe size={18} /> {i18n.language.toUpperCase()}
+          </button>
+
+          <button className="btn-secondary" onClick={handleResetData} title={t('reset_app')} style={{ color: 'var(--color-danger)' }}>
+            <Trash2 size={18} />
           </button>
         </div>
       </div>
