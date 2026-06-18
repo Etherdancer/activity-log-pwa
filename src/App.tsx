@@ -5,6 +5,8 @@ import { db } from './db/database';
 import { UserSwitcher } from './components/UserSwitcher';
 import { ShareImportData } from './components/ShareImportData';
 import { WeeklyCalendar } from './components/WeeklyCalendar';
+import { PrintModal } from './components/PrintModal';
+import { PrintView } from './components/PrintView';
 import { Activity, Globe, LogOut, Printer } from 'lucide-react';
 import './App.css';
 
@@ -13,6 +15,9 @@ function App() {
   const users = useLiveQuery(() => db.users.toArray());
   const [activeUserId, setActiveUserId] = useState<number | null>(null);
 
+  const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
+  const [printConfig, setPrintConfig] = useState<{ userId: number; startDate: string; endDate: string } | null>(null);
+
   const activeUser = users?.find(u => u.id === activeUserId) || users?.[0];
 
   const handleLanguageToggle = () => {
@@ -20,9 +25,21 @@ function App() {
     i18n.changeLanguage(newLang);
   };
 
-  const handlePrint = () => {
-    window.print();
+  const handlePrintRequest = (userId: number, startDate: string, endDate: string) => {
+    setPrintConfig({ userId, startDate, endDate });
   };
+
+  if (printConfig) {
+    return (
+      <PrintView 
+        config={printConfig} 
+        onReady={() => {
+          window.print();
+          setPrintConfig(null);
+        }} 
+      />
+    );
+  }
 
   if (users === undefined) {
     return <div className="app-wrapper"><div className="empty-state">Loading...</div></div>;
@@ -65,7 +82,7 @@ function App() {
           
           <ShareImportData user={activeUser} />
 
-          <button className="btn-secondary" onClick={handlePrint} title={t('print')}>
+          <button className="btn-secondary" onClick={() => setIsPrintModalOpen(true)} title={t('print')}>
             <Printer size={18} />
           </button>
           
@@ -82,6 +99,12 @@ function App() {
       <div className="main-content printable-content">
         <WeeklyCalendar user={activeUser} />
       </div>
+
+      <PrintModal 
+        isOpen={isPrintModalOpen}
+        onClose={() => setIsPrintModalOpen(false)}
+        onPrint={handlePrintRequest}
+      />
     </div>
   );
 }
