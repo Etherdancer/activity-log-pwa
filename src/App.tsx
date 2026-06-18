@@ -10,6 +10,7 @@ import { UserDropdown } from './components/UserDropdown';
 import { CreateUserModal } from './components/CreateUserModal';
 import { CreateUser } from './components/CreateUser';
 import { PrivacyNotice } from './components/PrivacyNotice';
+import { ImportLinkModal } from './components/ImportLinkModal';
 import { Activity, Globe, Printer } from 'lucide-react';
 import './App.css';
 
@@ -65,6 +66,7 @@ function App() {
         <div className="main-content">
           <CreateUser onCreated={() => {}} />
         </div>
+        <ImportLinkModal />
         <PrivacyNotice />
       </div>
     );
@@ -121,6 +123,7 @@ function App() {
         onCreated={() => {}}
       />
 
+      <ImportLinkModal />
       <PrivacyNotice />
     </div>
   );
