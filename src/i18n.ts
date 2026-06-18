@@ -49,8 +49,8 @@ const resources = {
       "import_now": "Uvezi odmah",
       "invalid_link": "Nevažeća poveznica. Podaci su oštećeni.",
       "reset_app": "Obriši sve podatke",
-      "reset_confirm_1": "Jeste li apsolutno sigurni da želite izbrisati sve podatke iz ove aplikacije na ovom uređaju? Ne postoje nikakve sigurnosne kopije na internetu!",
-      "reset_confirm_2": "Zadnje upozorenje: Svi korisnici i aktivnosti bit će trajno izgubljeni. Jeste li potpuno sigurni da želite nastaviti?"
+      "reset_confirm_1": "Želite li izbrisati sve podatke s ovog uređaja?",
+      "reset_confirm_2": "Jeste li sigurni? Ne postoje nikakve sigurnosne kopije na internetu i podaci će biti trajno izgubljeni."
     }
   },
   en: {
@@ -105,8 +105,8 @@ const resources = {
       "import_now": "Import Now",
       "invalid_link": "Invalid link. Data is corrupted.",
       "reset_app": "Clear All Data",
-      "reset_confirm_1": "Are you absolutely sure you want to delete all data from this app on this device? There are no cloud backups!",
-      "reset_confirm_2": "Final warning: All users and activities will be permanently lost. Are you completely sure you want to proceed?"
+      "reset_confirm_1": "Do you want to delete all data from this device?",
+      "reset_confirm_2": "Are you sure? There are no cloud backups anywhere and data will be permanently lost."
     }
   }
 };
