@@ -55,7 +55,8 @@ const resources = {
       "invalid_link": "Nevažeća poveznica. Podaci su oštećeni.",
       "reset_app": "Obriši sve podatke",
       "reset_confirm_1": "Želite li izbrisati sve podatke s ovog uređaja?",
-      "reset_confirm_2": "Jeste li sigurni? Ne postoje nikakve sigurnosne kopije na internetu i podaci će biti trajno izgubljeni."
+      "reset_confirm_2": "Jeste li sigurni? Ne postoje nikakve sigurnosne kopije na internetu i podaci će biti trajno izgubljeni.",
+      "delete_user_confirm": "Jeste li sigurni da želite obrisati ovog korisnika i sve njegove aktivnosti?"
     }
   },
   en: {
@@ -116,7 +117,8 @@ const resources = {
       "invalid_link": "Invalid link. Data is corrupted.",
       "reset_app": "Clear All Data",
       "reset_confirm_1": "Do you want to delete all data from this device?",
-      "reset_confirm_2": "Are you sure? There are no cloud backups anywhere and data will be permanently lost."
+      "reset_confirm_2": "Are you sure? There are no cloud backups anywhere and data will be permanently lost.",
+      "delete_user_confirm": "Are you sure you want to delete this user and all their activities?"
     }
   }
 };

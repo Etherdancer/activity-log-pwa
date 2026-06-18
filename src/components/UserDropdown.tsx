@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ChevronDown, Plus, User as UserIcon } from 'lucide-react';
-import type { User } from '../db/database';
+import { ChevronDown, Plus, User as UserIcon, Trash2 } from 'lucide-react';
+import { db, type User } from '../db/database';
 import './UserDropdown.css';
 
 interface UserDropdownProps {
@@ -27,6 +27,19 @@ export function UserDropdown({ users, activeUser, onSelectUser, onAddUser }: Use
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const handleDeleteUser = async (e: React.MouseEvent, user: User) => {
+    e.stopPropagation();
+    if (window.confirm(t('delete_user_confirm'))) {
+      try {
+        await db.activities.where('userId').equals(user.id!).delete();
+        await db.users.delete(user.id!);
+        setIsOpen(false);
+      } catch (err) {
+        console.error("Failed to delete user", err);
+      }
+    }
+  };
+
   return (
     <div className="user-dropdown-container" ref={dropdownRef}>
       <button className="user-dropdown-trigger" onClick={() => setIsOpen(!isOpen)}>
@@ -38,17 +51,27 @@ export function UserDropdown({ users, activeUser, onSelectUser, onAddUser }: Use
       {isOpen && (
         <div className="user-dropdown-menu">
           {users.map(user => (
-            <button
-              key={user.id}
-              className={`dropdown-item ${activeUser.id === user.id ? 'active' : ''}`}
-              onClick={() => {
-                onSelectUser(user.id!);
-                setIsOpen(false);
-              }}
-            >
-              <UserIcon size={16} />
-              {user.firstName} {user.lastName}
-            </button>
+            <div key={user.id} className={`dropdown-item-wrapper ${activeUser.id === user.id ? 'active' : ''}`} style={{ display: 'flex', alignItems: 'center' }}>
+              <button
+                className={`dropdown-item`}
+                style={{ flex: 1, border: 'none', background: 'transparent' }}
+                onClick={() => {
+                  onSelectUser(user.id!);
+                  setIsOpen(false);
+                }}
+              >
+                <UserIcon size={16} />
+                {user.firstName} {user.lastName}
+              </button>
+              <button 
+                className="delete-user-btn" 
+                style={{ padding: '0.5rem', color: 'var(--color-danger)', border: 'none', background: 'transparent', cursor: 'pointer' }}
+                onClick={(e) => handleDeleteUser(e, user)}
+                title="Delete User"
+              >
+                <Trash2 size={16} />
+              </button>
+            </div>
           ))}
           <div className="dropdown-divider"></div>
           <button

@@ -24,10 +24,17 @@ export function ShareImportData({ user }: { user: User }) {
       }
 
       // Check if user exists, if not create
-      let importedUserId = data.user.id;
-      const existingUser = await db.users.get(importedUserId);
-      if (!existingUser) {
-        importedUserId = await db.users.add({
+      const allUsers = await db.users.toArray();
+      const existingUser = allUsers.find(u => 
+        u.firstName === data.user.firstName && 
+        u.lastName === data.user.lastName
+      );
+
+      let targetUserId;
+      if (existingUser && existingUser.id) {
+        targetUserId = existingUser.id;
+      } else {
+        targetUserId = await db.users.add({
           firstName: data.user.firstName,
           lastName: data.user.lastName,
           colorTheme: data.user.colorTheme || 'ocean',
@@ -38,7 +45,7 @@ export function ShareImportData({ user }: { user: User }) {
       // Import activities
       const mappedActivities = data.activities.map((a: any) => ({
         ...a,
-        userId: importedUserId,
+        userId: targetUserId,
         id: a.id || crypto.randomUUID()
       }));
 

@@ -43,10 +43,17 @@ export function ImportLinkModal() {
     if (!importData) return;
     try {
       // Check if user exists, if not create
-      let importedUserId = importData.user.id;
-      const existingUser = await db.users.get(importedUserId);
-      if (!existingUser) {
-        importedUserId = await db.users.add({
+      const allUsers = await db.users.toArray();
+      const existingUser = allUsers.find(u => 
+        u.firstName === importData.user.firstName && 
+        u.lastName === importData.user.lastName
+      );
+      
+      let targetUserId;
+      if (existingUser && existingUser.id) {
+        targetUserId = existingUser.id;
+      } else {
+        targetUserId = await db.users.add({
           firstName: importData.user.firstName,
           lastName: importData.user.lastName,
           colorTheme: importData.user.colorTheme || 'ocean',
@@ -57,7 +64,7 @@ export function ImportLinkModal() {
       // Import activities
       const mappedActivities = importData.activities.map((a: any) => ({
         ...a,
-        userId: importedUserId,
+        userId: targetUserId,
         id: a.id || crypto.randomUUID()
       }));
 
