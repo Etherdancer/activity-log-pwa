@@ -198,7 +198,7 @@ button {
   }
 
   .print-page {
-    height: 98vh;
+    height: 190mm; /* Use explicit mm to guarantee it fits A4 height */
     display: flex;
     flex-direction: column;
     page-break-after: always;
