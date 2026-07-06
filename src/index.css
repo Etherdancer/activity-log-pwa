@@ -172,6 +172,11 @@ button {
     margin: 1cm;
   }
 
+  html, body {
+    height: auto;
+    overflow: visible;
+  }
+
   body {
     background: white;
     -webkit-print-color-adjust: exact;
