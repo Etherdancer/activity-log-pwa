@@ -208,9 +208,9 @@ button {
   }
 
   .hour-cell {
-    height: auto !important;
-    min-height: 40px;
-    overflow: visible !important;
+    height: auto;
+    min-height: 20px;
+    overflow: visible;
     padding-bottom: 2px !important;
   }
 
@@ -226,7 +226,7 @@ button {
 
   /* Make cells a bit shorter to fit vertically on one page */
   .hour-cell, .time-slot {
-    height: 22px; 
+    height: 20px; 
     font-size: 8px;
     padding: 0;
   }

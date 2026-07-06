@@ -8,7 +8,7 @@ import { format, startOfWeek, endOfWeek } from 'date-fns';
 interface PrintModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onPrint: (userId: number, startDate: string, endDate: string, isEmptyTemplate: boolean) => void;
+  onPrint: (userId: number, startDate: string, endDate: string, startHour: number, endHour: number, isEmptyTemplate: boolean) => void;
 }
 
 export function PrintModal({ isOpen, onClose, onPrint }: PrintModalProps) {
@@ -18,6 +18,8 @@ export function PrintModal({ isOpen, onClose, onPrint }: PrintModalProps) {
   const [selectedUserId, setSelectedUserId] = useState<number | ''>('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [startHour, setStartHour] = useState<number>(0);
+  const [endHour, setEndHour] = useState<number>(23);
   const [isEmptyTemplate, setIsEmptyTemplate] = useState(false);
 
   useEffect(() => {
@@ -25,6 +27,8 @@ export function PrintModal({ isOpen, onClose, onPrint }: PrintModalProps) {
       const now = new Date();
       setStartDate(format(startOfWeek(now, { weekStartsOn: 1 }), 'yyyy-MM-dd'));
       setEndDate(format(endOfWeek(now, { weekStartsOn: 1 }), 'yyyy-MM-dd'));
+      setStartHour(0);
+      setEndHour(23);
       setIsEmptyTemplate(false);
       if (users.length > 0 && selectedUserId === '') {
         setSelectedUserId(users[0].id!);
@@ -36,15 +40,19 @@ export function PrintModal({ isOpen, onClose, onPrint }: PrintModalProps) {
 
   const handlePrint = () => {
     if ((selectedUserId === '' && !isEmptyTemplate) || !startDate || !endDate) return;
-    onPrint(Number(selectedUserId) || 0, startDate, endDate, isEmptyTemplate);
+    onPrint(Number(selectedUserId) || 0, startDate, endDate, startHour, endHour, isEmptyTemplate);
     onClose();
   };
+
+  const hourOptions = Array.from({ length: 24 }).map((_, i) => (
+    <option key={i} value={i}>{i.toString().padStart(2, '0')}:00</option>
+  ));
 
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
-          <h3>{t('print')}</h3>
+          <h3>{t('print')} / Export PDF</h3>
           <button className="close-btn" onClick={onClose}>
             <X size={20} />
           </button>
@@ -89,12 +97,27 @@ export function PrintModal({ isOpen, onClose, onPrint }: PrintModalProps) {
               <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} />
             </div>
           </div>
+
+          <div className="datetime-row" style={{ marginTop: '1rem' }}>
+            <div className="form-group">
+              <label>Start Hour</label>
+              <select value={startHour} onChange={e => setStartHour(Number(e.target.value))}>
+                {hourOptions}
+              </select>
+            </div>
+            <div className="form-group">
+              <label>End Hour</label>
+              <select value={endHour} onChange={e => setEndHour(Number(e.target.value))}>
+                {hourOptions}
+              </select>
+            </div>
+          </div>
         </div>
 
         <div className="modal-footer">
           <button className="btn-secondary" onClick={onClose}>{t('cancel')}</button>
-          <button className="btn-primary" onClick={handlePrint} disabled={(selectedUserId === '' && !isEmptyTemplate) || !startDate || !endDate}>
-            {t('print')}
+          <button className="btn-primary" onClick={handlePrint} disabled={(selectedUserId === '' && !isEmptyTemplate) || !startDate || !endDate || startHour > endHour}>
+            Print / Export PDF
           </button>
         </div>
       </div>

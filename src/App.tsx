@@ -21,15 +21,15 @@ function App() {
 
   const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
   const [isCreateUserModalOpen, setIsCreateUserModalOpen] = useState(false);
-  const [printConfig, setPrintConfig] = useState<{ userId: number; startDate: string; endDate: string; isEmptyTemplate?: boolean } | null>(null);
+  const [printConfig, setPrintConfig] = useState<{ userId: number; startDate: string; endDate: string; startHour: number; endHour: number; isEmptyTemplate?: boolean } | null>(null);
 
   const handleLanguageToggle = () => {
     const newLang = i18n.language === 'hr' ? 'en' : 'hr';
     i18n.changeLanguage(newLang);
   };
 
-  const handlePrintRequest = (userId: number, startDate: string, endDate: string, isEmptyTemplate: boolean) => {
-    setPrintConfig({ userId, startDate, endDate, isEmptyTemplate });
+  const handlePrintRequest = (userId: number, startDate: string, endDate: string, startHour: number, endHour: number, isEmptyTemplate: boolean) => {
+    setPrintConfig({ userId, startDate, endDate, startHour, endHour, isEmptyTemplate });
   };
 
   const handleResetData = async () => {
@@ -115,7 +115,7 @@ function App() {
           
           <ShareImportData user={activeUser} />
 
-          <button className="btn-secondary" onClick={() => setIsPrintModalOpen(true)} title={t('print')}>
+          <button className="btn-secondary" onClick={() => setIsPrintModalOpen(true)} title={`${t('print')} / Export PDF`}>
             <Printer size={18} />
           </button>
           

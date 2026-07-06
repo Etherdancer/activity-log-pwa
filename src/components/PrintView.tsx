@@ -14,7 +14,7 @@ import { db } from '../db/database';
 import './WeeklyCalendar.css'; // Reuse calendar styles
 
 interface PrintViewProps {
-  config: { userId: number; startDate: string; endDate: string; isEmptyTemplate?: boolean };
+  config: { userId: number; startDate: string; endDate: string; startHour: number; endHour: number; isEmptyTemplate?: boolean };
   onReady: () => void;
 }
 
@@ -62,7 +62,8 @@ export function PrintView({ config, onReady }: PrintViewProps) {
     return <div className="printable-content">Loading print view...</div>;
   }
 
-  const hours = Array.from({ length: 24 }).map((_, i) => i);
+  const hoursLength = Math.max(1, config.endHour - config.startHour + 1);
+  const hours = Array.from({ length: hoursLength }).map((_, i) => config.startHour + i);
 
   return (
     <div className="printable-content" style={{ background: 'white' }}>
