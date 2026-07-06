@@ -169,12 +169,12 @@ button {
 @media print {
   @page {
     size: A4 landscape;
-    margin: 1cm;
+    margin: 0.5cm;
   }
 
   html, body {
-    height: auto;
-    overflow: visible;
+    height: 100vh;
+    overflow: hidden;
   }
 
   body {
@@ -188,61 +188,93 @@ button {
   }
 
   .app-wrapper {
-    height: auto;
-    display: block;
+    display: none;
   }
 
-  .main-content {
+  .printable-content {
     padding: 0;
-    overflow: visible;
-    height: auto;
-  }
-
-  .calendar-container {
-    box-shadow: none;
-    border: none;
-    height: auto;
-  }
-
-  .calendar-grid-wrapper {
-    overflow: visible !important;
-  }
-
-  .calendar-grid {
-    min-width: auto;
-  }
-
-  .hour-cell {
-    height: auto;
-    min-height: 20px;
-    overflow: visible;
-    padding-bottom: 2px !important;
+    margin: 0;
+    width: 100%;
   }
 
   .print-page {
+    height: 98vh;
+    display: flex;
+    flex-direction: column;
     page-break-after: always;
     break-after: page;
+    margin-bottom: 0 !important;
   }
 
   .calendar-header {
     border: none;
-    padding: 0 0 1rem 0;
+    padding: 0 0 0.5rem 0 !important;
+    flex-shrink: 0;
   }
 
-  /* Make cells a bit shorter to fit vertically on one page */
-  .hour-cell, .time-slot {
-    height: 20px; 
-    font-size: 8px;
-    padding: 0;
+  .calendar-header h2 {
+    font-size: 1rem !important;
+    margin-bottom: 0;
+  }
+
+  .calendar-grid-wrapper {
+    flex: 1;
+    overflow: hidden !important;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .calendar-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 35px repeat(7, 1fr);
+    min-width: auto;
+    height: 100%;
+  }
+
+  .time-col, .day-col {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
   }
 
   .day-header, .time-header {
-    height: 30px;
+    height: 25px !important;
+    flex-shrink: 0;
+    padding: 0 !important;
+  }
+
+  .day-header .date-num {
+    font-size: 0.8rem !important;
+  }
+
+  .day-header .day-name {
+    font-size: 0.5rem !important;
+  }
+
+  .hour-cell, .time-slot {
+    flex: 1;
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .time-slot {
+    font-size: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .activity-item {
-    font-size: 7px;
-    padding: 1px 2px;
-    margin: 0;
+    font-size: 6px !important;
+    padding: 1px 2px !important;
+    margin: 1px 0 !important;
+    line-height: 1 !important;
+    max-height: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
   }
 }
