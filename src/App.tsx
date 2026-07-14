@@ -70,8 +70,9 @@ function App() {
       <div className="app-wrapper">
         <div className="top-nav no-print">
           <div className="title-section">
-            <a href="https://etherdancer-homepage.pages.dev" title="Back to Etherdancer Apps" style={{ color: 'var(--text-muted)', display: 'flex', alignItems: 'center', transition: 'color 0.2s' }}>
-              <LayoutGrid size={20} />
+            <a href="https://etherdancer-homepage.pages.dev" title="Back to Etherdancer Apps" style={{ color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.4rem', textDecoration: 'none', fontSize: '0.85rem', transition: 'color 0.2s' }}>
+              <LayoutGrid size={18} />
+              <span className="hide-on-mobile">Etherdancer Homepage</span>
             </a>
             <Activity className="text-primary" style={{ marginLeft: '0.5rem' }} />
             {t('app_title')}
@@ -106,8 +107,9 @@ function App() {
     <div className="app-wrapper">
       <div className="top-nav no-print">
         <div className="title-section">
-          <a href="https://etherdancer-homepage.pages.dev" title="Back to Etherdancer Apps" style={{ color: 'var(--text-muted)', display: 'flex', alignItems: 'center', transition: 'color 0.2s' }}>
-            <LayoutGrid size={20} />
+          <a href="https://etherdancer-homepage.pages.dev" title="Back to Etherdancer Apps" style={{ color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.4rem', textDecoration: 'none', fontSize: '0.85rem', transition: 'color 0.2s' }}>
+            <LayoutGrid size={18} />
+            <span className="hide-on-mobile">Etherdancer Homepage</span>
           </a>
           <Activity className="text-primary" style={{ marginLeft: '0.5rem' }} />
           {t('app_title')}
