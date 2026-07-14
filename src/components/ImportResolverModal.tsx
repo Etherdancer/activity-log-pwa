@@ -56,14 +56,40 @@ export function ImportResolverModal({ isOpen, importData, onClose }: ImportResol
       // Fetch existing activities for this user
       const existingActivities = await db.activities.where('userId').equals(tUserId).toArray();
       
+      const parseTime = (t: string) => { 
+        if (!t) return 0;
+        const [h,m] = t.split(':').map(Number); 
+        return h * 60 + (m || 0); 
+      };
+
       const foundConflicts: { incoming: Activity; existing: Activity }[] = [];
       
       importData.activities.forEach((inc: any) => {
-        // Find an existing activity at the same date and time
-        const overlap = existingActivities.find(ex => ex.date === inc.date && ex.startTime === inc.startTime);
+        const incStart = parseTime(inc.startTime);
+        let incEnd = incStart + 60;
+        if (inc.endTime) {
+          incEnd = parseTime(inc.endTime);
+          if (incEnd < incStart) incEnd += 24 * 60;
+        }
+
+        // Find an existing activity that intersects in time
+        const overlap = existingActivities.find(ex => {
+          if (ex.date !== inc.date) return false;
+          
+          const exStart = parseTime(ex.startTime);
+          let exEnd = exStart + 60;
+          if (ex.endTime) {
+            exEnd = parseTime(ex.endTime);
+            if (exEnd < exStart) exEnd += 24 * 60;
+          }
+
+          // Check intersection
+          return incStart < exEnd && exStart < incEnd;
+        });
+
         if (overlap) {
           // If they are exactly the same, it's not a conflict we care about (just ignore or overwrite it)
-          if (overlap.description !== inc.description || overlap.endTime !== inc.endTime) {
+          if (overlap.startTime !== inc.startTime || overlap.endTime !== inc.endTime || overlap.description !== inc.description) {
             foundConflicts.push({ incoming: inc, existing: overlap });
           }
         }

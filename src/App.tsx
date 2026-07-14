@@ -11,6 +11,7 @@ import { CreateUserModal } from './components/CreateUserModal';
 import { CreateUser } from './components/CreateUser';
 import { PrivacyNotice } from './components/PrivacyNotice';
 import { ImportLinkModal } from './components/ImportLinkModal';
+import { InstallPWA } from './components/InstallPWA';
 import { Activity, Globe, Printer, Trash2 } from 'lucide-react';
 import './App.css';
 
@@ -73,6 +74,7 @@ function App() {
             {t('app_title')}
           </div>
           <div className="actions-section">
+            <InstallPWA />
             <button className="btn-secondary" onClick={handleResetData} title={t('reset_app')} style={{ color: 'var(--color-danger)' }}>
               <Trash2 size={18} />
             </button>
@@ -114,6 +116,8 @@ function App() {
           />
           
           <ShareImportData user={activeUser} />
+
+          <InstallPWA />
 
           <button className="btn-secondary" onClick={() => setIsPrintModalOpen(true)} title={`${t('print')} / Export PDF`}>
             <Printer size={18} />

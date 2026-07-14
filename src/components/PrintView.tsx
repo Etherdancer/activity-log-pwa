@@ -11,6 +11,7 @@ import {
 import { hr, enUS } from 'date-fns/locale';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db/database';
+import { formatDisplayTime } from '../utils/time';
 import './WeeklyCalendar.css'; // Reuse calendar styles
 
 interface PrintViewProps {
@@ -92,48 +93,75 @@ export function PrintView({ config, onReady }: PrintViewProps) {
               )}
             </div>
             
-            <div className="calendar-grid-wrapper">
-              <div className="calendar-grid">
-                {/* Time Column */}
-                <div className="time-col">
-                  <div className="time-header"></div>
-                  {hours.map(hour => (
-                    <div key={`time-${hour}`} className="time-slot">
-                      {hour.toString().padStart(2, '0')}:00
-                    </div>
-                  ))}
-                </div>
-
-                {/* Days Columns */}
-                {weekDays.map(day => {
-                  const dateStr = format(day, 'yyyy-MM-dd');
-                  const dayActivities = activities.filter(a => a.date === dateStr);
-                  const isToday = isSameDay(day, new Date());
-
-                  return (
-                    <div key={dateStr} className="day-col">
-                      <div className={`day-header ${isToday ? 'is-today' : ''}`}>
-                        <span className="day-name">{format(day, 'EEEE', { locale })}</span>
-                        <span className="date-num">{format(day, 'd')}</span>
+              <div className="calendar-grid-wrapper">
+                <div className="calendar-grid">
+                  {/* Time Column */}
+                  <div className="time-col">
+                    <div className="time-header"></div>
+                    {hours.map(hour => (
+                      <div key={`time-${hour}`} className="time-slot">
+                        {formatDisplayTime(`${hour.toString().padStart(2, '0')}:00`, i18n.language)}
                       </div>
-                      
-                      {hours.map(hour => {
-                        const hourStr = hour.toString().padStart(2, '0');
-                        const actsInHour = dayActivities.filter(a => a.startTime.startsWith(hourStr + ':'));
+                    ))}
+                  </div>
 
-                        return (
-                          <div key={`${dateStr}-${hour}`} className="hour-cell">
-                            {actsInHour.map(act => (
-                              <div key={act.id} className="activity-item" title={act.description}>
-                                {act.startTime} {act.description}
+                  {/* Days Columns */}
+                  {weekDays.map(day => {
+                    const dateStr = format(day, 'yyyy-MM-dd');
+                    const dayActivities = activities.filter(a => a.date === dateStr);
+                    const isToday = isSameDay(day, new Date());
+
+                    const calculateActivityStyle = (startTime: string, endTime?: string) => {
+                      const parseMins = (t: string) => { 
+                        if (!t) return 0;
+                        const [h,m] = t.split(':').map(Number); 
+                        return h * 60 + (m || 0); 
+                      };
+                      const startMins = parseMins(startTime);
+                      let endMins = endTime ? parseMins(endTime) : startMins + 60; // default 1h
+                      if (endMins < startMins) endMins += 24 * 60;
+                      
+                      const durationMins = endMins - startMins;
+                      return {
+                        top: `calc((${startMins} / 60) * var(--hour-height))`,
+                        height: `calc((${durationMins} / 60) * var(--hour-height))`
+                      };
+                    };
+
+                    return (
+                      <div key={dateStr} className="day-col">
+                        <div className={`day-header ${isToday ? 'is-today' : ''}`}>
+                          <span className="day-name">{format(day, 'EEEE', { locale })}</span>
+                          <span className="date-num">{format(day, 'd')}</span>
+                        </div>
+                        
+                        <div className="day-events-area">
+                          {hours.map(hour => (
+                            <div key={`${dateStr}-${hour}`} className="hour-cell" />
+                          ))}
+
+                          {dayActivities.map(act => {
+                            const displayStart = formatDisplayTime(act.startTime, i18n.language);
+                            const displayEnd = act.endTime ? formatDisplayTime(act.endTime, i18n.language) : '';
+                            return (
+                              <div 
+                                key={act.id} 
+                                className="activity-item" 
+                                style={calculateActivityStyle(act.startTime, act.endTime)}
+                              >
+                                <span className="activity-time-range">
+                                  {displayStart}{displayEnd ? ` - ${displayEnd}` : ''}
+                                </span>
+                                <span className="activity-text">
+                                  {act.description}
+                                </span>
                               </div>
-                            ))}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  );
-                })}
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
               </div>
             </div>
           </div>

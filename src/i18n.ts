@@ -6,6 +6,7 @@ const resources = {
   hr: {
     translation: {
       "app_title": "Dnevnik Aktivnosti",
+      "install_app": "Instaliraj Aplikaciju",
       "add_activity": "Dodaj Aktivnost",
       "now": "Sada",
       "export_data": "Izvezi Podatke",
@@ -47,6 +48,11 @@ const resources = {
       "generate_file": "Generiraj datoteku",
       "share_file": "Podijeli / Spremi datoteku",
       "whatsapp_preview_warning": "Savjet: Kada zalijepite ovo u WhatsApp ili Viber, pričekajte nekoliko sekundi da se pojavi pregled aplikacije prije slanja. Poveznica je dugačka jer sadrži sve podatke koje dijelite.",
+      "duration": "Trajanje",
+      "end_time": "Vrijeme završetka",
+      "minutes": "minuta",
+      "input_mode": "Način unosa",
+      "overlap_warning": "Ova aktivnost se preklapa s postojećom na isti dan. Želite li svejedno spremiti?",
       "copy_link": "Kopiraj poveznicu",
       "share_link": "Podijeli poveznicu",
       "link_copied": "Poveznica kopirana!",
@@ -69,6 +75,7 @@ const resources = {
   en: {
     translation: {
       "app_title": "Activity Log",
+      "install_app": "Install App",
       "add_activity": "Add Activity",
       "edit_activity": "Edit Activity",
       "delete_activity": "Delete Activity",
@@ -116,6 +123,10 @@ const resources = {
       "generate_file": "Generate File",
       "share_file": "Share / Save File",
       "whatsapp_preview_warning": "Tip: When pasting this into WhatsApp or Viber, wait a few seconds for the app preview to appear before pressing send. The link is long because it contains all the data you are sharing.",
+      "duration": "Duration",
+      "minutes": "minutes",
+      "input_mode": "Input mode",
+      "overlap_warning": "This activity overlaps with an existing one on the same day. Save anyway?",
       "copy_link": "Copy Link",
       "share_link": "Share Link",
       "link_copied": "Link copied!",

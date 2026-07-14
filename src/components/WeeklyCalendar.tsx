@@ -14,6 +14,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import type { User } from '../db/database';
 import { db } from '../db/database';
 import { ActivityModal } from './ActivityModal';
+import { formatDisplayTime } from '../utils/time';
 import './WeeklyCalendar.css';
 
 export function WeeklyCalendar({ user }: { user: User }) {
@@ -68,7 +69,7 @@ export function WeeklyCalendar({ user }: { user: User }) {
             <div className="time-header"></div>
             {hours.map(hour => (
               <div key={`time-${hour}`} className="time-slot">
-                {hour.toString().padStart(2, '0')}:00
+                {formatDisplayTime(`${hour.toString().padStart(2, '0')}:00`, i18n.language)}
               </div>
             ))}
           </div>
@@ -79,6 +80,23 @@ export function WeeklyCalendar({ user }: { user: User }) {
             const dayActivities = activities?.filter(a => a.date === dateStr) || [];
             const isToday = isSameDay(day, new Date());
 
+            const calculateActivityStyle = (startTime: string, endTime?: string) => {
+              const parseMins = (t: string) => { 
+                if (!t) return 0;
+                const [h,m] = t.split(':').map(Number); 
+                return h * 60 + (m || 0); 
+              };
+              const startMins = parseMins(startTime);
+              let endMins = endTime ? parseMins(endTime) : startMins + 60; // default 1h
+              if (endMins < startMins) endMins += 24 * 60;
+              
+              const durationMins = endMins - startMins;
+              return {
+                top: `calc((${startMins} / 60) * var(--hour-height))`,
+                height: `calc((${durationMins} / 60) * var(--hour-height))`
+              };
+            };
+
             return (
               <div key={dateStr} className="day-col">
                 <div className={`day-header ${isToday ? 'is-today' : ''}`}>
@@ -86,55 +104,64 @@ export function WeeklyCalendar({ user }: { user: User }) {
                   <span className="date-num">{format(day, 'd')}</span>
                 </div>
                 
-                {hours.map(hour => {
-                  // Find activities starting in this hour
-                  const hourStr = hour.toString().padStart(2, '0');
-                  const actsInHour = dayActivities.filter(a => a.startTime.startsWith(hourStr + ':'));
+                <div className="day-events-area">
+                  {/* Background grid cells */}
+                  {hours.map(hour => {
+                    const hourStr = hour.toString().padStart(2, '0');
+                    return (
+                      <div 
+                        key={`${dateStr}-${hour}`} 
+                        className="hour-cell"
+                        onClick={() => {
+                          setEditingActivity(null);
+                          setModalInitialDate(dateStr);
+                          setModalInitialTime(`${hourStr}:00`);
+                          setIsModalOpen(true);
+                        }}
+                      />
+                    );
+                  })}
 
-                  return (
-                    <div 
-                      key={`${dateStr}-${hour}`} 
-                      className="hour-cell"
-                      onClick={() => {
-                        setEditingActivity(null);
-                        setModalInitialDate(dateStr);
-                        setModalInitialTime(`${hourStr}:00`);
-                        setIsModalOpen(true);
-                      }}
-                    >
-                      {actsInHour.map(act => (
-                        <div 
-                          key={act.id} 
-                          className="activity-item" 
-                          title={act.description}
-                          onClick={(e) => {
+                  {/* Absolute positioned activities */}
+                  {dayActivities.map(act => {
+                    const displayStart = formatDisplayTime(act.startTime, i18n.language);
+                    const displayEnd = act.endTime ? formatDisplayTime(act.endTime, i18n.language) : '';
+                    return (
+                      <div 
+                        key={act.id} 
+                        className="activity-item" 
+                        style={calculateActivityStyle(act.startTime, act.endTime)}
+                        title={`${displayStart}${displayEnd ? ` - ${displayEnd}` : ''}: ${act.description}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditingActivity(act);
+                          setModalInitialDate(act.date);
+                          setModalInitialTime(act.startTime);
+                          setIsModalOpen(true);
+                        }}
+                      >
+                        <span className="activity-time-range">
+                          {displayStart}{displayEnd ? ` - ${displayEnd}` : ''}
+                        </span>
+                        <span className="activity-text">
+                          {act.description}
+                        </span>
+                        <button 
+                          className="delete-activity-btn"
+                          title={t('delete_activity')}
+                          onClick={async (e) => {
                             e.stopPropagation();
-                            setEditingActivity(act);
-                            setModalInitialDate(act.date);
-                            setModalInitialTime(act.startTime);
-                            setIsModalOpen(true);
+                            if (window.confirm(t('delete_activity') + '?')) {
+                              await db.activities.delete(act.id);
+                            }
                           }}
                         >
-                          <span className="activity-text">
-                            {act.startTime} {act.description}
-                          </span>
-                          <button 
-                            className="delete-activity-btn"
-                            title={t('delete_activity')}
-                            onClick={async (e) => {
-                              e.stopPropagation();
-                              if (window.confirm(t('delete_activity') + '?')) {
-                                await db.activities.delete(act.id);
-                              }
-                            }}
-                          >
-                            <X size={12} />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  );
-                })}
+                          <X size={12} />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             );
           })}
