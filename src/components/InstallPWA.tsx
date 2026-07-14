@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Download } from 'lucide-react';
+import { MonitorDown } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 // Add type for the beforeinstallprompt event
@@ -52,8 +52,9 @@ export function InstallPWA() {
   }
 
   return (
-    <button className="btn-secondary" onClick={handleInstallClick} title={t('install_app') || 'Install App'}>
-      <Download size={18} />
+    <button className="btn-primary" onClick={handleInstallClick} title={t('install_app') || 'Install App'} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.25rem 0.75rem', borderRadius: '4px', fontSize: '0.875rem' }}>
+      <MonitorDown size={16} />
+      <span className="hide-on-mobile">{t('install_app') || 'Install'}</span>
     </button>
   );
 }
