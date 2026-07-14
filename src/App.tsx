@@ -12,7 +12,7 @@ import { CreateUser } from './components/CreateUser';
 import { PrivacyNotice } from './components/PrivacyNotice';
 import { ImportLinkModal } from './components/ImportLinkModal';
 import { InstallPWA } from './components/InstallPWA';
-import { Activity, Globe, Printer, Trash2 } from 'lucide-react';
+import { Activity, Globe, Printer, Trash2, LayoutGrid } from 'lucide-react';
 import './App.css';
 
 function App() {
@@ -70,7 +70,10 @@ function App() {
       <div className="app-wrapper">
         <div className="top-nav no-print">
           <div className="title-section">
-            <Activity className="text-primary" />
+            <a href="https://etherdancer-homepage.pages.dev" title="Back to Etherdancer Apps" style={{ color: 'var(--text-muted)', display: 'flex', alignItems: 'center', transition: 'color 0.2s' }}>
+              <LayoutGrid size={20} />
+            </a>
+            <Activity className="text-primary" style={{ marginLeft: '0.5rem' }} />
             {t('app_title')}
           </div>
           <div className="actions-section">
@@ -103,7 +106,10 @@ function App() {
     <div className="app-wrapper">
       <div className="top-nav no-print">
         <div className="title-section">
-          <Activity className="text-primary" />
+          <a href="https://etherdancer-homepage.pages.dev" title="Back to Etherdancer Apps" style={{ color: 'var(--text-muted)', display: 'flex', alignItems: 'center', transition: 'color 0.2s' }}>
+            <LayoutGrid size={20} />
+          </a>
+          <Activity className="text-primary" style={{ marginLeft: '0.5rem' }} />
           {t('app_title')}
         </div>
         
