@@ -197,38 +197,44 @@ button {
     width: 100%;
   }
 
+  /* Each page fills exactly the A4 landscape height minus margins */
   .print-page {
-    height: 190mm; /* Use explicit mm to guarantee it fits A4 height */
+    height: 190mm;
     display: flex;
     flex-direction: column;
     page-break-after: always;
     break-after: page;
     margin-bottom: 0 !important;
+    overflow: hidden;
   }
 
   .calendar-header {
     border: none;
-    padding: 0 0 0.5rem 0 !important;
+    padding: 0 0 4px 0 !important;
     flex-shrink: 0;
   }
 
   .calendar-header h2 {
-    font-size: 1rem !important;
+    font-size: 0.9rem !important;
     margin-bottom: 0;
   }
 
+  /* Grid wrapper takes all remaining height */
   .calendar-grid-wrapper {
     flex: 1;
     overflow: hidden !important;
     display: flex;
     flex-direction: column;
+    min-height: 0;
   }
 
+  /* Grid fills wrapper */
   .calendar-grid {
     flex: 1;
     display: grid;
-    grid-template-columns: 35px repeat(7, 1fr);
+    grid-template-columns: 32px repeat(7, 1fr);
     min-width: auto;
+    min-height: 0;
     height: 100%;
   }
 
@@ -236,16 +242,22 @@ button {
     display: flex;
     flex-direction: column;
     height: 100%;
+    min-height: 0;
   }
 
   .day-header, .time-header {
-    height: 25px !important;
+    height: 22px !important;
+    min-height: 22px !important;
     flex-shrink: 0;
     padding: 0 !important;
   }
 
+  .day-header {
+    font-size: 0.55rem !important;
+  }
+
   .day-header .date-num {
-    font-size: 0.8rem !important;
+    font-size: 0.75rem !important;
   }
 
   .day-header.is-today {
@@ -254,28 +266,13 @@ button {
   }
 
   .day-header .day-name {
-    font-size: 0.5rem !important;
+    font-size: 0.45rem !important;
   }
 
-  .hour-cell, .time-slot {
-    flex: 1;
-    height: auto !important;
-    min-height: 0 !important;
-    padding: 0 !important;
-    overflow: hidden !important;
-  }
-
-  .time-slot {
-    font-size: 7px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
+  /* Activity items — sized and positioned by JS inline styles */
   .activity-item {
-    padding: 1px 2px !important;
-    margin: 1px 0 !important;
-    max-height: 100%;
+    padding: 0 2px !important;
+    margin: 0 !important;
     overflow: hidden;
   }
 }

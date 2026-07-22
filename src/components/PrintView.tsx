@@ -68,6 +68,42 @@ export function PrintView({ config, onReady }: PrintViewProps) {
   const hoursLength = Math.max(1, config.endHour - config.startHour + 1);
   const hours = Array.from({ length: hoursLength }).map((_, i) => config.startHour + i);
 
+  // Total visible minutes in the selected time range
+  const totalVisibleMins = hoursLength * 60;
+  // Start offset in minutes from midnight
+  const viewStartMins = config.startHour * 60;
+
+  // Calculate position as percentage of the visible time range
+  const calcActivityStyle = (startTime: string, endTime?: string) => {
+    const parseMins = (t: string) => {
+      if (!t) return 0;
+      const [h, m] = t.split(':').map(Number);
+      return h * 60 + (m || 0);
+    };
+
+    const startMins = parseMins(startTime);
+    let endMins = endTime ? parseMins(endTime) : startMins + 60;
+    if (endMins < startMins) endMins += 24 * 60;
+
+    // Clamp to visible range
+    const clampedStart = Math.max(startMins, viewStartMins);
+    const clampedEnd = Math.min(endMins, viewStartMins + totalVisibleMins);
+    const durationMins = endMins - startMins; // original, unclipped
+
+    if (clampedEnd <= clampedStart) return null; // fully outside visible range
+
+    const topPct = ((clampedStart - viewStartMins) / totalVisibleMins) * 100;
+    const heightPct = ((clampedEnd - clampedStart) / totalVisibleMins) * 100;
+
+    return {
+      style: {
+        top: `${topPct}%`,
+        height: `${heightPct}%`,
+      },
+      durationMins,
+    };
+  };
+
   return (
     <div className="printable-content" style={{ background: 'white' }}>
       {weeks.map((weekStart, idx) => {
@@ -95,103 +131,124 @@ export function PrintView({ config, onReady }: PrintViewProps) {
               )}
             </div>
             
-              <div className="calendar-grid-wrapper">
-                <div className="calendar-grid">
-                  {/* Time Column */}
-                  <div className="time-col">
-                    <div className="time-header"></div>
-                    {hours.map(hour => (
-                      <div key={`time-${hour}`} className="time-slot">
+            <div className="calendar-grid-wrapper">
+              <div className="calendar-grid">
+                {/* Time Column */}
+                <div className="time-col">
+                  <div className="time-header"></div>
+                  {/* Events area for time labels — percentage positioned */}
+                  <div style={{ flex: 1, position: 'relative' }}>
+                    {hours.map((hour, i) => (
+                      <div
+                        key={`time-${hour}`}
+                        style={{
+                          position: 'absolute',
+                          top: `${(i / hoursLength) * 100}%`,
+                          left: 0,
+                          right: 0,
+                          fontSize: '7px',
+                          display: 'flex',
+                          alignItems: 'flex-start',
+                          justifyContent: 'center',
+                          paddingTop: '1px',
+                          color: 'var(--text-muted)',
+                          borderTop: '1px solid var(--color-surface-100)',
+                        }}
+                      >
                         {formatDisplayTime(`${hour.toString().padStart(2, '0')}:00`, i18n.language)}
                       </div>
                     ))}
                   </div>
+                </div>
 
-                  {/* Days Columns */}
-                  {weekDays.map(day => {
-                    const dateStr = format(day, 'yyyy-MM-dd');
-                    const dayActivities = activities.filter(a => a.date === dateStr);
+                {/* Days Columns */}
+                {weekDays.map(day => {
+                  const dateStr = format(day, 'yyyy-MM-dd');
+                  const dayActivities = activities.filter(a => a.date === dateStr);
 
-                    const calculateActivityStyle = (startTime: string, endTime?: string) => {
-                      const parseMins = (t: string) => { 
-                        if (!t) return 0;
-                        const [h,m] = t.split(':').map(Number); 
-                        return h * 60 + (m || 0); 
-                      };
-                      const startMins = parseMins(startTime);
-                      let endMins = endTime ? parseMins(endTime) : startMins + 60; // default 1h
-                      if (endMins < startMins) endMins += 24 * 60;
-                      
-                      const durationMins = endMins - startMins;
-                      return {
-                        style: {
-                          top: `calc((${startMins} / 60) * var(--hour-height))`,
-                          height: `calc((${durationMins} / 60) * var(--hour-height))`
-                        },
-                        durationMins
-                      };
-                    };
-
-                    return (
-                      <div key={dateStr} className="day-col">
-                        <div className="day-header">
-                          <span className="day-name">{format(day, 'EEEE', { locale })}</span>
-                          <span className="date-num">{format(day, 'd')}</span>
-                        </div>
-                        
-                        <div className="day-events-area">
-                          {hours.map(hour => (
-                            <div key={`${dateStr}-${hour}`} className="hour-cell" />
-                          ))}
-
-                          {dayActivities.map(act => {
-                            const displayStart = formatDisplayTime(act.startTime, i18n.language);
-                            const displayEnd = act.endTime ? formatDisplayTime(act.endTime, i18n.language) : '';
-                            const { style, durationMins } = calculateActivityStyle(act.startTime, act.endTime);
-                            
-                            const isVeryShort = durationMins <= 20;
-                            const isShort = durationMins <= 40;
-
-                            return (
-                              <div 
-                                key={act.id} 
-                                className="activity-item" 
-                                style={{
-                                  ...style,
-                                  display: 'flex',
-                                  flexDirection: isShort ? 'row' : 'column',
-                                  alignItems: isShort ? 'center' : 'flex-start',
-                                  padding: isVeryShort ? '0.1rem 0.2rem' : '0.2rem 0.4rem',
-                                  gap: isShort ? '0.3rem' : '0.1rem',
-                                  fontSize: isVeryShort ? '0.6rem' : isShort ? '0.65rem' : '0.75rem',
-                                  lineHeight: 1.1,
-                                  overflow: 'hidden'
-                                }}
-                              >
-                                {!isVeryShort && (
-                                  <span className="activity-time-range" style={{ fontWeight: 600, flexShrink: 0, opacity: 0.85, whiteSpace: 'nowrap' }}>
-                                    {displayStart}{displayEnd && !isShort ? ` - ${displayEnd}` : ''}
-                                  </span>
-                                )}
-                                <span className="activity-text" style={{ 
-                                  overflow: 'hidden',
-                                  textOverflow: 'ellipsis',
-                                  whiteSpace: isShort ? 'nowrap' : 'normal',
-                                  display: isShort ? 'block' : '-webkit-box',
-                                  WebkitLineClamp: isShort ? undefined : Math.max(1, Math.floor(durationMins / 15)),
-                                  WebkitBoxOrient: isShort ? undefined : 'vertical',
-                                  wordBreak: 'break-word',
-                                  flex: 1
-                                }}>
-                                  {act.description}
-                                </span>
-                              </div>
-                            );
-                          })}
-                        </div>
+                  return (
+                    <div key={dateStr} className="day-col">
+                      <div className="day-header">
+                        <span className="day-name">{format(day, 'EEEE', { locale })}</span>
+                        <span className="date-num">{format(day, 'd')}</span>
                       </div>
-                    );
-                  })}
+                      
+                      {/* Events area — percentage positioned, fills remaining height */}
+                      <div style={{ flex: 1, position: 'relative', borderLeft: '1px solid var(--color-surface-100)' }}>
+                        {/* Hour grid lines */}
+                        {hours.map((_, i) => (
+                          <div
+                            key={i}
+                            style={{
+                              position: 'absolute',
+                              top: `${(i / hoursLength) * 100}%`,
+                              left: 0,
+                              right: 0,
+                              borderTop: '1px solid var(--color-surface-100)',
+                              height: 0,
+                            }}
+                          />
+                        ))}
+
+                        {/* Activity blocks */}
+                        {dayActivities.map(act => {
+                          const result = calcActivityStyle(act.startTime, act.endTime);
+                          if (!result) return null;
+
+                          const { style, durationMins } = result;
+                          const displayStart = formatDisplayTime(act.startTime, i18n.language);
+                          const displayEnd = act.endTime ? formatDisplayTime(act.endTime, i18n.language) : '';
+
+                          // Font size scales with visible height percentage
+                          const heightPct = parseFloat(style.height);
+                          const isVeryShort = heightPct < 3 || durationMins <= 20;
+                          const isShort = heightPct < 6 || durationMins <= 40;
+
+                          return (
+                            <div
+                              key={act.id}
+                              className="activity-item"
+                              style={{
+                                ...style,
+                                position: 'absolute',
+                                left: '2px',
+                                right: '2px',
+                                display: 'flex',
+                                flexDirection: isShort ? 'row' : 'column',
+                                alignItems: isShort ? 'center' : 'flex-start',
+                                padding: isVeryShort ? '0 1px' : '1px 3px',
+                                gap: isShort ? '2px' : '1px',
+                                fontSize: isVeryShort ? '0.5rem' : isShort ? '0.6rem' : '0.7rem',
+                                lineHeight: 1.1,
+                                overflow: 'hidden',
+                                boxSizing: 'border-box',
+                              }}
+                            >
+                              {!isVeryShort && (
+                                <span style={{ fontWeight: 600, flexShrink: 0, opacity: 0.85, whiteSpace: 'nowrap', fontSize: 'inherit' }}>
+                                  {displayStart}{displayEnd && !isShort ? ` - ${displayEnd}` : ''}
+                                </span>
+                              )}
+                              <span style={{
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: isShort ? 'nowrap' : 'normal',
+                                display: isShort ? 'block' : '-webkit-box',
+                                WebkitLineClamp: isShort ? undefined : Math.max(1, Math.floor(durationMins / 15)),
+                                WebkitBoxOrient: isShort ? undefined : 'vertical',
+                                wordBreak: 'break-word',
+                                flex: 1,
+                                fontSize: 'inherit',
+                              }}>
+                                {act.description}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>

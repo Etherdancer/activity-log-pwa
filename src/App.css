@@ -4,7 +4,7 @@
   height: 100%; /* fallback */
   height: 100dvh; /* use dvh for mobile browsers */
   background-color: var(--bg-main);
-  overflow: hidden;
+  overflow: visible;
 }
 
 .top-nav {
@@ -14,8 +14,10 @@
   padding: 1rem 1.5rem;
   background-color: var(--bg-header);
   box-shadow: var(--shadow-sm);
-  z-index: 10;
+  z-index: 100;
   flex-shrink: 0;
+  overflow: visible;
+  position: relative;
 }
 
 .title-section {
