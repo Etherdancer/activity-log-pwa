@@ -248,6 +248,11 @@ button {
     font-size: 0.8rem !important;
   }
 
+  .day-header.is-today {
+    color: inherit;
+    font-weight: 500;
+  }
+
   .day-header .day-name {
     font-size: 0.5rem !important;
   }
@@ -268,13 +273,9 @@ button {
   }
 
   .activity-item {
-    font-size: 6px !important;
     padding: 1px 2px !important;
     margin: 1px 0 !important;
-    line-height: 1 !important;
     max-height: 100%;
     overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
   }
 }

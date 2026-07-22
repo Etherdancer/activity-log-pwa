@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useTranslation } from 'react-i18next';
 import { db } from './db/database';
@@ -48,14 +48,16 @@ function App() {
     }
   };
 
+  const handlePrintReady = useCallback(() => {
+    window.print();
+    setPrintConfig(null);
+  }, []);
+
   if (printConfig) {
     return (
       <PrintView 
         config={printConfig} 
-        onReady={() => {
-          window.print();
-          setPrintConfig(null);
-        }} 
+        onReady={handlePrintReady} 
       />
     );
   }

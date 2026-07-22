@@ -38,7 +38,7 @@ export function ActivityModal({ isOpen, onClose, userId, initialDate, initialTim
   const [description, setDescription] = useState('');
   
   const [inputMode, setInputMode] = useState<'duration' | 'end_time'>('duration');
-  const [duration, setDuration] = useState(60);
+  const [duration, setDuration] = useState<number | ''>(60);
   const [endTime, setEndTime] = useState('');
 
   useEffect(() => {
@@ -72,7 +72,8 @@ export function ActivityModal({ isOpen, onClose, userId, initialDate, initialTim
   const handleTimeChange = (newTime: string) => {
     setTime(newTime);
     if (inputMode === 'duration') {
-      setEndTime(formatTime(parseTime(newTime) + duration));
+      const activeDuration = typeof duration === 'number' ? duration : 1;
+      setEndTime(formatTime(parseTime(newTime) + activeDuration));
     } else {
       let newDur = parseTime(endTime) - parseTime(newTime);
       if (newDur < 0) newDur += 24 * 60;
@@ -81,8 +82,13 @@ export function ActivityModal({ isOpen, onClose, userId, initialDate, initialTim
   };
 
   const handleDurationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let val = parseInt(e.target.value, 10);
-    if (isNaN(val)) val = 1;
+    const rawVal = e.target.value;
+    if (rawVal === '') {
+      setDuration('');
+      return;
+    }
+    let val = parseInt(rawVal, 10);
+    if (isNaN(val)) return;
     if (val < 1) val = 1; // Enforce minimum duration of 1 minute
     setDuration(val);
     setEndTime(formatTime(parseTime(time) + val));
@@ -108,8 +114,9 @@ export function ActivityModal({ isOpen, onClose, userId, initialDate, initialTim
     if (!description.trim()) return;
 
     // Overlap check
+    const activeDuration = typeof duration === 'number' ? duration : 1;
     const newStartMins = parseTime(time);
-    const newEndMins = newStartMins + duration;
+    const newEndMins = newStartMins + activeDuration;
 
     const dayActs = await db.activities.where('[userId+date]').equals([userId, date]).toArray();
     let hasOverlap = false;
@@ -215,11 +222,16 @@ export function ActivityModal({ isOpen, onClose, userId, initialDate, initialTim
                 <label>{t('duration')} ({t('minutes')})</label>
                 <input 
                   type="number" 
-                  value={duration} 
+                  value={duration === '' ? '' : duration} 
                   onChange={handleDurationChange} 
                   min="1"
                   step="5"
                 />
+                {duration === '' && (
+                  <div style={{ color: 'var(--color-danger)', fontSize: '0.75rem', marginTop: '0.25rem' }}>
+                    {t('duration_required', 'Enter a duration to save')}
+                  </div>
+                )}
               </div>
             ) : (
               <div className="form-group">
@@ -243,7 +255,7 @@ export function ActivityModal({ isOpen, onClose, userId, initialDate, initialTim
 
         <div className="modal-footer">
           <button className="btn-secondary" onClick={onClose}>{t('cancel')}</button>
-          <button className="btn-primary" onClick={handleSave} disabled={!description.trim()}>{t('save')}</button>
+          <button className="btn-primary" onClick={handleSave} disabled={!description.trim() || (inputMode === 'duration' && duration === '')}>{t('save')}</button>
         </div>
       </div>
     </div>

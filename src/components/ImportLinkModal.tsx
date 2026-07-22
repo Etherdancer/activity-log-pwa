@@ -9,10 +9,18 @@ export function ImportLinkModal() {
   const [importData, setImportData] = useState<any>(null);
 
   useEffect(() => {
-    const hash = window.location.hash;
-    if (hash.startsWith('#import=')) {
+    const href = window.location.href;
+    const importIndex = href.indexOf('#import=');
+    
+    if (importIndex !== -1) {
       try {
-        const compressed = hash.replace('#import=', '');
+        let compressed = href.substring(importIndex + 8);
+        // Strip any appended tracking parameters or invalid characters (LZString encodedURIComponent uses A-Za-z0-9+-$)
+        const match = compressed.match(/^[A-Za-z0-9+\-$]+/);
+        if (match) {
+          compressed = match[0];
+        }
+
         const jsonStr = LZString.decompressFromEncodedURIComponent(compressed);
         if (!jsonStr) throw new Error("Decompression failed");
         

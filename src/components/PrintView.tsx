@@ -1,11 +1,8 @@
 import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { 
-  startOfWeek, 
   addDays, 
   format, 
-  isSameDay, 
-  eachWeekOfInterval,
   parseISO
 } from 'date-fns';
 import { hr, enUS } from 'date-fns/locale';
@@ -25,13 +22,18 @@ export function PrintView({ config, onReady }: PrintViewProps) {
 
   const user = useLiveQuery(() => db.users.get(config.userId), [config.userId]);
   
-  // Calculate all weeks involved in the range
+  // Calculate 7-day chunks starting from the exact startDate
   const weeks = useMemo(() => {
     try {
       const start = parseISO(config.startDate);
       const end = parseISO(config.endDate);
-      const weekStarts = eachWeekOfInterval({ start, end }, { weekStartsOn: 1 });
-      return weekStarts.length > 0 ? weekStarts : [startOfWeek(start, { weekStartsOn: 1 })];
+      const chunks = [];
+      let current = start;
+      while (current <= end) {
+        chunks.push(current);
+        current = addDays(current, 7);
+      }
+      return chunks.length > 0 ? chunks : [start];
     } catch {
       return [];
     }
@@ -76,7 +78,7 @@ export function PrintView({ config, onReady }: PrintViewProps) {
             <div className="calendar-header" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginBottom: config.isEmptyTemplate ? '1rem' : '0' }}>
                 <h2>{config.isEmptyTemplate ? t('app_title') : `${user?.firstName} ${user?.lastName}`}</h2>
-                <h2>{t('week_of')} {format(weekStart, 'PP', { locale })}</h2>
+                <h2>{format(weekStart, 'PP', { locale })} - {format(weekDays[6], 'PP', { locale })}</h2>
               </div>
               
               {config.isEmptyTemplate && (
@@ -109,7 +111,6 @@ export function PrintView({ config, onReady }: PrintViewProps) {
                   {weekDays.map(day => {
                     const dateStr = format(day, 'yyyy-MM-dd');
                     const dayActivities = activities.filter(a => a.date === dateStr);
-                    const isToday = isSameDay(day, new Date());
 
                     const calculateActivityStyle = (startTime: string, endTime?: string) => {
                       const parseMins = (t: string) => { 
@@ -123,14 +124,17 @@ export function PrintView({ config, onReady }: PrintViewProps) {
                       
                       const durationMins = endMins - startMins;
                       return {
-                        top: `calc((${startMins} / 60) * var(--hour-height))`,
-                        height: `calc((${durationMins} / 60) * var(--hour-height))`
+                        style: {
+                          top: `calc((${startMins} / 60) * var(--hour-height))`,
+                          height: `calc((${durationMins} / 60) * var(--hour-height))`
+                        },
+                        durationMins
                       };
                     };
 
                     return (
                       <div key={dateStr} className="day-col">
-                        <div className={`day-header ${isToday ? 'is-today' : ''}`}>
+                        <div className="day-header">
                           <span className="day-name">{format(day, 'EEEE', { locale })}</span>
                           <span className="date-num">{format(day, 'd')}</span>
                         </div>
@@ -143,16 +147,42 @@ export function PrintView({ config, onReady }: PrintViewProps) {
                           {dayActivities.map(act => {
                             const displayStart = formatDisplayTime(act.startTime, i18n.language);
                             const displayEnd = act.endTime ? formatDisplayTime(act.endTime, i18n.language) : '';
+                            const { style, durationMins } = calculateActivityStyle(act.startTime, act.endTime);
+                            
+                            const isVeryShort = durationMins <= 20;
+                            const isShort = durationMins <= 40;
+
                             return (
                               <div 
                                 key={act.id} 
                                 className="activity-item" 
-                                style={calculateActivityStyle(act.startTime, act.endTime)}
+                                style={{
+                                  ...style,
+                                  display: 'flex',
+                                  flexDirection: isShort ? 'row' : 'column',
+                                  alignItems: isShort ? 'center' : 'flex-start',
+                                  padding: isVeryShort ? '0.1rem 0.2rem' : '0.2rem 0.4rem',
+                                  gap: isShort ? '0.3rem' : '0.1rem',
+                                  fontSize: isVeryShort ? '0.6rem' : isShort ? '0.65rem' : '0.75rem',
+                                  lineHeight: 1.1,
+                                  overflow: 'hidden'
+                                }}
                               >
-                                <span className="activity-time-range">
-                                  {displayStart}{displayEnd ? ` - ${displayEnd}` : ''}
-                                </span>
-                                <span className="activity-text">
+                                {!isVeryShort && (
+                                  <span className="activity-time-range" style={{ fontWeight: 600, flexShrink: 0, opacity: 0.85, whiteSpace: 'nowrap' }}>
+                                    {displayStart}{displayEnd && !isShort ? ` - ${displayEnd}` : ''}
+                                  </span>
+                                )}
+                                <span className="activity-text" style={{ 
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis',
+                                  whiteSpace: isShort ? 'nowrap' : 'normal',
+                                  display: isShort ? 'block' : '-webkit-box',
+                                  WebkitLineClamp: isShort ? undefined : Math.max(1, Math.floor(durationMins / 15)),
+                                  WebkitBoxOrient: isShort ? undefined : 'vertical',
+                                  wordBreak: 'break-word',
+                                  flex: 1
+                                }}>
                                   {act.description}
                                 </span>
                               </div>

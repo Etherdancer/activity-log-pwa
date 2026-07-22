@@ -30,7 +30,7 @@ export function PrintModal({ isOpen, onClose, onPrint }: PrintModalProps) {
       setStartHour(0);
       setEndHour(23);
       setIsEmptyTemplate(false);
-      if (users.length > 0 && selectedUserId === '') {
+      if (users.length > 0) {
         setSelectedUserId(users[0].id!);
       }
     }
@@ -52,7 +52,7 @@ export function PrintModal({ isOpen, onClose, onPrint }: PrintModalProps) {
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
-          <h3>{t('print')} / Export PDF</h3>
+          <h3>{t('print_export_pdf')}</h3>
           <button className="close-btn" onClick={onClose}>
             <X size={20} />
           </button>
@@ -67,7 +67,7 @@ export function PrintModal({ isOpen, onClose, onPrint }: PrintModalProps) {
               onChange={e => setIsEmptyTemplate(e.target.checked)} 
             />
             <label htmlFor="emptyTemplate" style={{ margin: 0, cursor: 'pointer' }}>
-              Print empty template
+              {t('print_empty_template')}
             </label>
           </div>
 
@@ -89,35 +89,40 @@ export function PrintModal({ isOpen, onClose, onPrint }: PrintModalProps) {
 
           <div className="datetime-row">
             <div className="form-group">
-              <label>Start Date</label>
+              <label>{t('start_date')}</label>
               <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} />
             </div>
             <div className="form-group">
-              <label>End Date</label>
+              <label>{t('end_date')}</label>
               <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} />
             </div>
           </div>
 
           <div className="datetime-row" style={{ marginTop: '1rem' }}>
             <div className="form-group">
-              <label>Start Hour</label>
+              <label>{t('start_hour')}</label>
               <select value={startHour} onChange={e => setStartHour(Number(e.target.value))}>
                 {hourOptions}
               </select>
             </div>
             <div className="form-group">
-              <label>End Hour</label>
+              <label>{t('end_hour')}</label>
               <select value={endHour} onChange={e => setEndHour(Number(e.target.value))}>
                 {hourOptions}
               </select>
             </div>
           </div>
+          {endDate && startDate && endDate < startDate && (
+            <div style={{ color: 'var(--color-danger)', fontSize: '0.8rem', marginTop: '0.5rem', width: '100%', textAlign: 'center' }}>
+              {t('date_range_invalid')}
+            </div>
+          )}
         </div>
 
         <div className="modal-footer">
           <button className="btn-secondary" onClick={onClose}>{t('cancel')}</button>
-          <button className="btn-primary" onClick={handlePrint} disabled={(selectedUserId === '' && !isEmptyTemplate) || !startDate || !endDate || startHour > endHour}>
-            Print / Export PDF
+          <button className="btn-primary" onClick={handlePrint} disabled={(selectedUserId === '' && !isEmptyTemplate) || !startDate || !endDate || startHour > endHour || endDate < startDate}>
+            {t('print_export_pdf')}
           </button>
         </div>
       </div>

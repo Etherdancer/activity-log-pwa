@@ -8,6 +8,8 @@ const resources = {
       "app_title": "Dnevnik Aktivnosti",
       "install_app": "Instaliraj Aplikaciju",
       "add_activity": "Dodaj Aktivnost",
+      "edit_activity": "Uredi Aktivnost",
+      "delete_activity": "Obriši Aktivnost",
       "now": "Sada",
       "export_data": "Izvezi Podatke",
       "export_failed": "Izvoz nije uspio",
@@ -69,7 +71,15 @@ const resources = {
       "conflict_keep_device": "Zadrži postojeće podatke na uređaju (Zanemari uvezene)",
       "conflict_keep_imported": "Zadrži nove uvezene podatke (Prepiši stare)",
       "conflict_merge": "Zadrži oboje (Zasebne aktivnosti)",
-      "importing_data": "Uvoz podataka..."
+      "importing_data": "Uvoz podataka...",
+      "print_empty_template": "Ispiši prazni predložak",
+      "start_date": "Datum početka",
+      "end_date": "Datum kraja",
+      "start_hour": "Sat početka",
+      "end_hour": "Sat kraja",
+      "print_export_pdf": "Ispiši / Izvezi PDF",
+      "date_range_invalid": "Datum kraja mora biti isti ili kasniji od datuma početka",
+      "duration_required": "Unesite trajanje za spremanje"
     }
   },
   en: {
@@ -143,7 +153,15 @@ const resources = {
       "conflict_keep_device": "Keep existing device data (Ignore imported)",
       "conflict_keep_imported": "Keep imported data (Overwrite existing)",
       "conflict_merge": "Keep both (Separate activities)",
-      "importing_data": "Importing data..."
+      "importing_data": "Importing data...",
+      "print_empty_template": "Print empty template",
+      "start_date": "Start Date",
+      "end_date": "End Date",
+      "start_hour": "Start Hour",
+      "end_hour": "End Hour",
+      "print_export_pdf": "Print / Export PDF",
+      "date_range_invalid": "End date must be on or after the start date",
+      "duration_required": "Enter a duration to save"
     }
   }
 };

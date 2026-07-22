@@ -177,7 +177,6 @@ export function ImportResolverModal({ isOpen, importData, onClose }: ImportResol
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', padding: '2rem 0' }}>
               <div className="spinner" style={{ width: '40px', height: '40px', border: '3px solid var(--color-surface-200)', borderTopColor: 'var(--color-primary-500)', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
               <p style={{ fontWeight: 500 }}>{t('importing_data') || 'Processing...'}</p>
-              <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
             </div>
           )}
 
