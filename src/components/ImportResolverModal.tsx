@@ -114,7 +114,7 @@ export function ImportResolverModal({ isOpen, importData, onClose }: ImportResol
       let activitiesToInsert = incomingData.map(a => ({
         ...a,
         userId: userId,
-        id: a.id || crypto.randomUUID()
+        id: a.id || ((typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).substring(2, 10))
       }));
 
       if (currentConflicts.length > 0) {
@@ -131,7 +131,7 @@ export function ImportResolverModal({ isOpen, importData, onClose }: ImportResol
           activitiesToInsert = activitiesToInsert.map(a => {
             const isConflict = currentConflicts.some(c => c.incoming.id === a.id);
             if (isConflict) {
-              return { ...a, id: crypto.randomUUID() }; // Ensure they coexist side-by-side
+              return { ...a, id: (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).substring(2, 10) }; // Ensure they coexist side-by-side
             }
             return a;
           });

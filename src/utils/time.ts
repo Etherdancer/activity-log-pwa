@@ -16,3 +16,21 @@ export function formatDisplayTime(timeStr: string | undefined, language: string)
   // default 24h format for 'hr' or others
   return `${h.toString().padStart(2, '0')}:${m}`;
 }
+
+/**
+ * Formats a Date for display to the user.
+ * Croatian (hr): DD/MM/YYYY
+ * English (en): MM/DD/YYYY
+ */
+export function formatDisplayDate(date: Date, language: string): string {
+  const d = date.getDate().toString().padStart(2, '0');
+  const m = (date.getMonth() + 1).toString().padStart(2, '0');
+  const y = date.getFullYear();
+
+  if (language === 'en') {
+    return `${m}/${d}/${y}`;
+  }
+
+  // Croatian and default: DD/MM/YYYY
+  return `${d}/${m}/${y}`;
+}

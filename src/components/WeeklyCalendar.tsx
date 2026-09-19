@@ -14,7 +14,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import type { User } from '../db/database';
 import { db } from '../db/database';
 import { ActivityModal } from './ActivityModal';
-import { formatDisplayTime } from '../utils/time';
+import { formatDisplayTime, formatDisplayDate } from '../utils/time';
 import './WeeklyCalendar.css';
 
 export function WeeklyCalendar({ user }: { user: User }) {
@@ -55,7 +55,7 @@ export function WeeklyCalendar({ user }: { user: User }) {
   return (
     <div className="calendar-container">
       <div className="calendar-header">
-        <h2>{t('week_of')} {format(weekStart, 'PP', { locale })}</h2>
+        <h2>{t('week_of')} {formatDisplayDate(weekStart, i18n.language)}</h2>
         <div className="calendar-nav">
           <button onClick={prevWeek}><ChevronLeft /></button>
           <button onClick={nextWeek}><ChevronRight /></button>

@@ -1,0 +1,2 @@
+# Redirect www. subdomain to apex domain
+https://www.activity-log-pwa.pages.dev/* https://activity-log-pwa.pages.dev/:splat 301

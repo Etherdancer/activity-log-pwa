@@ -8,7 +8,7 @@ import {
 import { hr, enUS } from 'date-fns/locale';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db/database';
-import { formatDisplayTime } from '../utils/time';
+import { formatDisplayTime, formatDisplayDate } from '../utils/time';
 import './WeeklyCalendar.css'; // Reuse calendar styles
 
 interface PrintViewProps {
@@ -114,7 +114,7 @@ export function PrintView({ config, onReady }: PrintViewProps) {
             <div className="calendar-header" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginBottom: config.isEmptyTemplate ? '1rem' : '0' }}>
                 <h2>{config.isEmptyTemplate ? t('app_title') : `${user?.firstName} ${user?.lastName}`}</h2>
-                <h2>{format(weekStart, 'PP', { locale })} - {format(weekDays[6], 'PP', { locale })}</h2>
+                <h2>{formatDisplayDate(weekStart, i18n.language)} - {formatDisplayDate(weekDays[6], i18n.language)}</h2>
               </div>
               
               {config.isEmptyTemplate && (

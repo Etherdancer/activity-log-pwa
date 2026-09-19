@@ -4,6 +4,7 @@ import { X } from 'lucide-react';
 import { db } from '../db/database';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { format, startOfWeek, endOfWeek } from 'date-fns';
+import { DateInput } from './DateInput';
 
 interface PrintModalProps {
   isOpen: boolean;
@@ -90,11 +91,11 @@ export function PrintModal({ isOpen, onClose, onPrint }: PrintModalProps) {
           <div className="datetime-row">
             <div className="form-group">
               <label>{t('start_date')}</label>
-              <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} />
+              <DateInput value={startDate} onChange={setStartDate} />
             </div>
             <div className="form-group">
               <label>{t('end_date')}</label>
-              <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} />
+              <DateInput value={endDate} onChange={setEndDate} />
             </div>
           </div>
 

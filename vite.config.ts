@@ -7,9 +7,19 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      registerType: 'autoUpdate',
+      workbox: {
+        navigateFallbackDenylist: [
+          /^\/about-us/,
+          /^\/privacy-policy/,
+          /^\/terms-of-use/,
+          /^\/contact-me/
+        ]
+      },
+      registerType: 'prompt',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png'],
       manifest: {
+        id: '/',
+        start_url: '/',
         name: 'Activity Log',
         short_name: 'ActivityLog',
         description: 'Local-first offline activity log PWA',

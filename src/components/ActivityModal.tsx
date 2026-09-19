@@ -4,6 +4,7 @@ import { X } from 'lucide-react';
 import { db, type Activity } from '../db/database';
 import { format } from 'date-fns';
 import { TimeInput } from './TimeInput';
+import { DateInput } from './DateInput';
 import './ActivityModal.css';
 
 interface ActivityModalProps {
@@ -155,7 +156,7 @@ export function ActivityModal({ isOpen, onClose, userId, initialDate, initialTim
         });
       } else {
         await db.activities.add({
-          id: crypto.randomUUID(),
+          id: (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).substring(2, 10),
           userId,
           date,
           startTime: time,
@@ -184,7 +185,7 @@ export function ActivityModal({ isOpen, onClose, userId, initialDate, initialTim
           <div className="datetime-row">
             <div className="form-group">
               <label>{t('date')}</label>
-              <input type="date" value={date} onChange={e => setDate(e.target.value)} />
+              <DateInput value={date} onChange={setDate} />
             </div>
             <div className="form-group">
               <label>{t('time')}</label>

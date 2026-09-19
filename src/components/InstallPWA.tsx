@@ -1,60 +1,118 @@
 import { useState, useEffect } from 'react';
-import { MonitorDown } from 'lucide-react';
+import { MonitorDown, X, Share } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-
-// Add type for the beforeinstallprompt event
-interface BeforeInstallPromptEvent extends Event {
-  readonly platforms: Array<string>;
-  readonly userChoice: Promise<{
-    outcome: 'accepted' | 'dismissed',
-    platform: string
-  }>;
-  prompt(): Promise<void>;
-}
 
 export function InstallPWA() {
   const { t } = useTranslation();
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [isIOS, setIsIOS] = useState(false);
+  const [isStandalone, setIsStandalone] = useState(false);
+  const [showIOSModal, setShowIOSModal] = useState(false);
+  const [showGenericModal, setShowGenericModal] = useState(false);
 
   useEffect(() => {
-    const handleBeforeInstallPrompt = (e: Event) => {
-      // Prevent the mini-infobar from appearing on mobile
+    // Check if already installed
+    if (window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone) {
+      setIsStandalone(true);
+    }
+
+    // Check if iOS
+    const userAgent = window.navigator.userAgent.toLowerCase();
+    const isIosDevice = /iphone|ipad|ipod/.test(userAgent);
+    setIsIOS(isIosDevice);
+
+    const handler = (e: any) => {
       e.preventDefault();
-      // Stash the event so it can be triggered later.
-      setDeferredPrompt(e as BeforeInstallPromptEvent);
+      setDeferredPrompt(e);
     };
 
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    };
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
 
-  const handleInstallClick = async () => {
-    if (!deferredPrompt) return;
-    
-    // Show the install prompt
-    deferredPrompt.prompt();
-    
-    // Wait for the user to respond to the prompt
-    const { outcome } = await deferredPrompt.userChoice;
-    
-    // Optionally, send analytics event with outcome of user choice
-    console.log(`User response to the install prompt: ${outcome}`);
-    
-    // We've used the prompt, and can't use it again, throw it away
-    setDeferredPrompt(null);
-  };
-
-  if (!deferredPrompt) {
-    return null; // Don't show anything if not installable or already installed
+  if (isStandalone) {
+    return null;
   }
 
+  const handleInstallClick = async () => {
+    if (isIOS) {
+      setShowIOSModal(true);
+    } else if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      console.log(`User response to the install prompt: ${outcome}`);
+      setDeferredPrompt(null);
+    } else {
+      // Fallback for browsers that don't support beforeinstallprompt (Firefox, Desktop Safari, etc.)
+      setShowGenericModal(true);
+    }
+  };
+
   return (
-    <button className="btn-primary" onClick={handleInstallClick} title={t('install_app') || 'Install App'} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.25rem 0.75rem', borderRadius: '4px', fontSize: '0.875rem' }}>
-      <MonitorDown size={16} />
-      <span className="hide-on-mobile">{t('install_app') || 'Install'}</span>
-    </button>
+    <>
+      <button 
+        className="btn-primary" 
+        onClick={handleInstallClick} 
+        title={t('install_app') || 'Install App'} 
+        style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.25rem 0.75rem', borderRadius: '4px', fontSize: '0.875rem' }}
+      >
+        <MonitorDown size={16} />
+        <span className="hide-on-mobile">{t('install_app') || 'Install'}</span>
+      </button>
+
+      {showIOSModal && (
+        <div className="modal-overlay" onClick={() => setShowIOSModal(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '400px', textAlign: 'center' }}>
+            <div className="modal-header">
+              <h2>Install on iOS</h2>
+              <button className="icon-btn" onClick={() => setShowIOSModal(false)}>
+                <X size={20} />
+              </button>
+            </div>
+            <div className="modal-body" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center' }}>
+              <div style={{ background: 'var(--surface-color)', padding: '1rem', borderRadius: '50%', marginBottom: '0.5rem' }}>
+                <Share size={32} color="var(--primary)" />
+              </div>
+              <p style={{ margin: 0, fontSize: '1.1rem' }}>
+                To install Activity Log on your iPhone or iPad:
+              </p>
+              <ol style={{ textAlign: 'left', margin: '0 auto', display: 'inline-block', lineHeight: '1.6' }}>
+                <li>Tap the <strong>Share</strong> button at the bottom of Safari.</li>
+                <li>Scroll down and tap <strong>Add to Home Screen</strong>.</li>
+              </ol>
+              <button className="btn-primary" onClick={() => setShowIOSModal(false)} style={{ width: '100%', marginTop: '1rem' }}>
+                Got it
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showGenericModal && (
+        <div className="modal-overlay" onClick={() => setShowGenericModal(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '450px', textAlign: 'center' }}>
+            <div className="modal-header">
+              <h2>Install App</h2>
+              <button className="icon-btn" onClick={() => setShowGenericModal(false)}>
+                <X size={20} />
+              </button>
+            </div>
+            <div className="modal-body" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem', textAlign: 'left' }}>
+              <p style={{ margin: 0 }}>
+                Your browser blocked the automatic install prompt, but you can still install Activity Log manually:
+              </p>
+              <ul style={{ margin: '0', paddingLeft: '1.5rem', lineHeight: '1.6' }}>
+                <li><strong>Chrome / Edge / Brave:</strong> Click the install icon (monitor with a downward arrow) on the far-right side of your URL address bar.</li>
+                <li><strong>Firefox:</strong> Natively unsupported on desktop, but you can install the "PWAsForFirefox" extension to enable it.</li>
+                <li><strong>Desktop Safari:</strong> Click "File" &gt; "Add to Dock" from the top menu bar.</li>
+              </ul>
+              <button className="btn-primary" onClick={() => setShowGenericModal(false)} style={{ width: '100%', marginTop: '1rem' }}>
+                Got it
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
