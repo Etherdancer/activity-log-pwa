@@ -1,8 +1,27 @@
 {
-  "name": "activity-log",
-  "private": true,
-  "version": "0.0.0",
+  "name": "activity-log-pwa",
+  "version": "1.0.0",
+  "description": "Privacy-first, local-first daily activity & habit tracking Progressive Web App with IndexedDB persistence and internationalization",
   "type": "module",
+  "license": "MIT",
+  "author": "Etherdancer",
+  "homepage": "https://activity-log-pwa.pages.dev/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Etherdancer/activity-log-pwa.git"
+  },
+  "keywords": [
+    "activity-log",
+    "habit-tracker",
+    "indexeddb",
+    "dexie",
+    "local-first",
+    "privacy",
+    "pwa",
+    "react",
+    "typescript",
+    "i18n"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",

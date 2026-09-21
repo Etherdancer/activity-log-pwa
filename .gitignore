@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Scratch & prompt notes
+initial-instruction.txt
+*.tmp
+
