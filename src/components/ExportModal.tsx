@@ -53,8 +53,8 @@ export function ExportModal({ isOpen, onClose, user, activities }: ExportModalPr
       } else {
         handleCopyLink();
       }
-    } catch (e: any) {
-      if (e.name !== 'AbortError') {
+    } catch (e) {
+      if ((e as Error).name !== 'AbortError') {
         handleCopyLink();
       }
     }
@@ -86,8 +86,8 @@ export function ExportModal({ isOpen, onClose, user, activities }: ExportModalPr
           });
           onClose();
           return;
-        } catch (e: any) {
-          if (e.name !== 'AbortError') {
+        } catch (e) {
+          if ((e as Error).name !== 'AbortError') {
             downloadFile(file, filename);
             onClose();
           }

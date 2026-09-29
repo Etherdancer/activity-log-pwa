@@ -1,18 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ShieldAlert } from 'lucide-react';
 import './PrivacyNotice.css';
 
 export function PrivacyNotice() {
   const { t } = useTranslation();
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    const hasAccepted = localStorage.getItem('privacy_accepted');
-    if (!hasAccepted) {
-      setIsVisible(true);
-    }
-  }, []);
+  const [isVisible, setIsVisible] = useState(() => {
+    try { return !localStorage.getItem('privacy_accepted'); } catch { return true; }
+  });
 
   const handleAccept = () => {
     localStorage.setItem('privacy_accepted', 'true');

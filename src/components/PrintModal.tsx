@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react';
 import { db } from '../db/database';
@@ -8,34 +8,23 @@ import { DateInput } from './DateInput';
 
 interface PrintModalProps {
   isOpen: boolean;
+  /** Person selected when the dialog opens (the one currently shown). */
+  defaultUserId: number;
   onClose: () => void;
   onPrint: (userId: number, startDate: string, endDate: string, startHour: number, endHour: number, isEmptyTemplate: boolean) => void;
 }
 
-export function PrintModal({ isOpen, onClose, onPrint }: PrintModalProps) {
+/** Remounted (via `key`) each time it opens, so the form starts from the defaults below. */
+export function PrintModal({ isOpen, defaultUserId, onClose, onPrint }: PrintModalProps) {
   const { t } = useTranslation();
-  const users = useLiveQuery(() => db.users.toArray()) || [];
-  
-  const [selectedUserId, setSelectedUserId] = useState<number | ''>('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const users = useLiveQuery(() => db.users.toArray()) ?? [];
+
+  const [selectedUserId, setSelectedUserId] = useState<number | ''>(defaultUserId);
+  const [startDate, setStartDate] = useState(() => format(startOfWeek(new Date(), { weekStartsOn: 1 }), 'yyyy-MM-dd'));
+  const [endDate, setEndDate] = useState(() => format(endOfWeek(new Date(), { weekStartsOn: 1 }), 'yyyy-MM-dd'));
   const [startHour, setStartHour] = useState<number>(0);
   const [endHour, setEndHour] = useState<number>(23);
   const [isEmptyTemplate, setIsEmptyTemplate] = useState(false);
-
-  useEffect(() => {
-    if (isOpen) {
-      const now = new Date();
-      setStartDate(format(startOfWeek(now, { weekStartsOn: 1 }), 'yyyy-MM-dd'));
-      setEndDate(format(endOfWeek(now, { weekStartsOn: 1 }), 'yyyy-MM-dd'));
-      setStartHour(0);
-      setEndHour(23);
-      setIsEmptyTemplate(false);
-      if (users.length > 0) {
-        setSelectedUserId(users[0].id!);
-      }
-    }
-  }, [isOpen, users]);
 
   if (!isOpen) return null;
 
@@ -80,7 +69,7 @@ export function PrintModal({ isOpen, onClose, onPrint }: PrintModalProps) {
                 onChange={e => setSelectedUserId(Number(e.target.value))}
                 style={{ padding: '0.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-surface-300)' }}
               >
-                <option value="" disabled>Select User</option>
+                <option value="" disabled>{t('select_user')}</option>
                 {users.map(u => (
                   <option key={u.id} value={u.id}>{u.firstName} {u.lastName}</option>
                 ))}
@@ -113,6 +102,11 @@ export function PrintModal({ isOpen, onClose, onPrint }: PrintModalProps) {
               </select>
             </div>
           </div>
+          {startHour > endHour && (
+            <div style={{ color: 'var(--color-danger)', fontSize: '0.8rem', marginTop: '0.5rem', width: '100%', textAlign: 'center' }}>
+              {t('hour_range_invalid')}
+            </div>
+          )}
           {endDate && startDate && endDate < startDate && (
             <div style={{ color: 'var(--color-danger)', fontSize: '0.8rem', marginTop: '0.5rem', width: '100%', textAlign: 'center' }}>
               {t('date_range_invalid')}

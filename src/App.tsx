@@ -15,10 +15,20 @@ import { InstallPWA } from './components/InstallPWA';
 import { Activity, Globe, Printer, Trash2, LayoutGrid } from 'lucide-react';
 import './App.css';
 
+const ACTIVE_USER_KEY = 'activeUserId';
+
 function App() {
   const { t, i18n } = useTranslation();
   const users = useLiveQuery(() => db.users.toArray());
-  const [activeUserId, setActiveUserId] = useState<number | null>(null);
+  // Remember the selected person across reloads.
+  const [activeUserId, setActiveUserIdState] = useState<number | null>(() => {
+    const v = Number(localStorage.getItem(ACTIVE_USER_KEY));
+    return Number.isFinite(v) && v > 0 ? v : null;
+  });
+  const setActiveUserId = (id: number) => {
+    setActiveUserIdState(id);
+    try { localStorage.setItem(ACTIVE_USER_KEY, String(id)); } catch { /* storage unavailable */ }
+  };
 
   const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
   const [isCreateUserModalOpen, setIsCreateUserModalOpen] = useState(false);
@@ -90,7 +100,7 @@ function App() {
           </div>
         </div>
         <div className="main-content">
-          <CreateUser onCreated={() => {}} />
+          <CreateUser onCreated={setActiveUserId} />
         </div>
         <ImportLinkModal />
         <PrivacyNotice />
@@ -148,6 +158,8 @@ function App() {
       </div>
 
       <PrintModal 
+        key={isPrintModalOpen ? 'open' : 'closed'}
+        defaultUserId={activeUser.id!}
         isOpen={isPrintModalOpen}
         onClose={() => setIsPrintModalOpen(false)}
         onPrint={handlePrintRequest}
@@ -156,7 +168,7 @@ function App() {
       <CreateUserModal 
         isOpen={isCreateUserModalOpen}
         onClose={() => setIsCreateUserModalOpen(false)}
-        onCreated={() => {}}
+        onCreated={setActiveUserId}
       />
 
       <ImportLinkModal />

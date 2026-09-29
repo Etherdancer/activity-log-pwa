@@ -5,15 +5,16 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db, type User } from '../db/database';
 import { ExportModal } from './ExportModal';
 import { ImportResolverModal } from './ImportResolverModal';
+import { parseImportPayload, type ExportPayload } from '../utils/importData';
 
 export function ShareImportData({ user }: { user: User }) {
   const { t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
-  const [importData, setImportData] = useState<any | null>(null);
-  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [importData, setImportData] = useState<ExportPayload | null>(null);
+  const [importKey, setImportKey] = useState(0);
 
-  const activities = useLiveQuery(() => db.activities.where('userId').equals(user.id!).toArray());
+  const activities = useLiveQuery(() => db.activities.where('userId').equals(user.id!).toArray(), [user.id]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -21,17 +22,13 @@ export function ShareImportData({ user }: { user: User }) {
 
     try {
       const text = await file.text();
-      const data = JSON.parse(text);
-
-      if (!data.user || !data.activities) {
-        throw new Error("Invalid format");
-      }
-
+      const data = parseImportPayload(JSON.parse(text));
+      if (!data) throw new Error("Invalid format");
       setImportData(data);
-      setIsImportModalOpen(true);
+      setImportKey(k => k + 1);
     } catch (error) {
       console.error("Import failed", error);
-      alert(t('import_failed') || "Import failed");
+      alert(t('import_failed'));
     }
     
     // Reset file input
@@ -65,14 +62,13 @@ export function ShareImportData({ user }: { user: User }) {
         activities={activities || []} 
       />
 
-      <ImportResolverModal
-        isOpen={isImportModalOpen}
-        importData={importData}
-        onClose={() => {
-          setIsImportModalOpen(false);
-          setImportData(null);
-        }}
-      />
+      {importData && (
+        <ImportResolverModal
+          key={importKey}
+          importData={importData}
+          onClose={() => setImportData(null)}
+        />
+      )}
     </>
   );
 }

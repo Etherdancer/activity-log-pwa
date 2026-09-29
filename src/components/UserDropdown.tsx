@@ -35,8 +35,11 @@ export function UserDropdown({ users, activeUser, onSelectUser, onAddUser }: Use
     e.stopPropagation();
     if (window.confirm(t('delete_user_confirm'))) {
       try {
-        await db.activities.where('userId').equals(user.id!).delete();
-        await db.users.delete(user.id!);
+        // One transaction: never leave activities without their person (or vice versa).
+        await db.transaction('rw', db.users, db.activities, async () => {
+          await db.activities.where('userId').equals(user.id!).delete();
+          await db.users.delete(user.id!);
+        });
         setIsOpen(false);
       } catch (err) {
         console.error("Failed to delete user", err);
@@ -56,7 +59,7 @@ export function UserDropdown({ users, activeUser, onSelectUser, onAddUser }: Use
     setRenamingUserId(null);
   };
 
-  const confirmRename = async (e: React.MouseEvent, user: User) => {
+  const confirmRename = async (e: React.SyntheticEvent, user: User) => {
     e.stopPropagation();
     const first = renameFirst.trim();
     const last = renameLast.trim();
@@ -97,7 +100,7 @@ export function UserDropdown({ users, activeUser, onSelectUser, onAddUser }: Use
                       border: '1px solid var(--color-surface-300)', borderRadius: 'var(--radius-sm)',
                       background: 'var(--bg-card)', color: 'var(--text-main)'
                     }}
-                    onKeyDown={e => { if (e.key === 'Enter') confirmRename(e as any, user); if (e.key === 'Escape') { setRenamingUserId(null); } }}
+                    onKeyDown={e => { if (e.key === 'Enter') confirmRename(e, user); if (e.key === 'Escape') { setRenamingUserId(null); } }}
                   />
                   <input
                     value={renameLast}
@@ -108,7 +111,7 @@ export function UserDropdown({ users, activeUser, onSelectUser, onAddUser }: Use
                       border: '1px solid var(--color-surface-300)', borderRadius: 'var(--radius-sm)',
                       background: 'var(--bg-card)', color: 'var(--text-main)'
                     }}
-                    onKeyDown={e => { if (e.key === 'Enter') confirmRename(e as any, user); if (e.key === 'Escape') { setRenamingUserId(null); } }}
+                    onKeyDown={e => { if (e.key === 'Enter') confirmRename(e, user); if (e.key === 'Escape') { setRenamingUserId(null); } }}
                   />
                   <button
                     style={{ padding: '4px', color: 'var(--color-primary-600)', cursor: 'pointer', flexShrink: 0 }}
