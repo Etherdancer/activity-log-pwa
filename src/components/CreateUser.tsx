@@ -4,7 +4,7 @@ import { db } from '../db/database';
 import { UserPlus } from 'lucide-react';
 import './CreateUser.css';
 
-export function CreateUser({ onCreated }: { onCreated: () => void }) {
+export function CreateUser({ onCreated }: { onCreated: (id: number) => void }) {
   const { t } = useTranslation();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -14,13 +14,13 @@ export function CreateUser({ onCreated }: { onCreated: () => void }) {
     if (!firstName.trim() || !lastName.trim()) return;
 
     try {
-      await db.users.add({
+      const id = await db.users.add({
         firstName: firstName.trim(),
         lastName: lastName.trim(),
         colorTheme: 'ocean',
         createdAt: Date.now()
       });
-      onCreated();
+      onCreated(id as number);
     } catch (error) {
       console.error("Failed to create user", error);
     }

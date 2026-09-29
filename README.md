@@ -1,118 +1,62 @@
-# Activity Log PWA ⏱️
+# Activity Log
 
-[![Live Demo](https://img.shields.io/badge/Demo-activity--log--pwa.pages.dev-059669?style=for-the-badge&logo=cloudflarepages&logoColor=white)](https://activity-log-pwa.pages.dev/)
-[![React](https://img.shields.io/badge/React_19-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://react.dev/)
-[![TypeScript](https://img.shields.io/badge/TypeScript_5-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Vite](https://img.shields.io/badge/Vite_8-646CFF?style=for-the-badge&logo=vite&logoColor=FFD62E)](https://vitejs.dev/)
-[![IndexedDB](https://img.shields.io/badge/Storage-IndexedDB_(Dexie)-purple?style=for-the-badge&logo=databricks&logoColor=white)](https://dexie.org/)
-[![CI/CD](https://img.shields.io/badge/CI%2FCD-Cloudflare_Pages-F38020?style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/Etherdancer/activity-log-pwa/actions)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
+[![Deploy](https://github.com/Etherdancer/activity-log-pwa/actions/workflows/deploy.yml/badge.svg)](https://github.com/Etherdancer/activity-log-pwa/actions/workflows/deploy.yml)
+[![Live app](https://img.shields.io/badge/app-activity--log--pwa.pages.dev-059669)](https://activity-log-pwa.pages.dev/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
 
-> **Activity Log** is a modern, local-first daily activity and habit tracking Progressive Web App. Built with React 19, TypeScript, and Dexie.js (IndexedDB), it provides fluid weekly time auditing, multi-profile tracking, compressed share links, and printable weekly sheets—**with zero remote server tracking.**
+**A private weekly activity diary for one or more people — no account, no server.**
+Activity Log is an installable web app (PWA) for recording what someone did and when, on
+a weekly hour-by-hour calendar. Everything is stored in the browser (IndexedDB) and works
+offline. It's built for carers, families and anyone who needs a simple time log that can be
+printed or shared without a cloud service.
 
----
+## Features
 
-## 💡 Architecture & Philosophy
+- **Weekly calendar** (Mon–Sun, 24 h). Click an hour to add an activity; set its length as a
+  duration or an end time. Overlapping activities sit side by side; activities past
+  midnight are supported.
+- **Several people** on one device, each with their own log. Rename or delete people; the
+  selected person is remembered.
+- **Share without a server:** export a person's log as a JSON file, or as a compressed link
+  (the data travels inside the link's `#fragment`, which is never sent to any server).
+  Importing detects conflicts (keep mine / keep imported / keep both) and skips exact duplicates.
+- **Print / PDF:** any date range and hour range, one week per page, or an empty template
+  to fill in by hand.
+- **Croatian and English**, 24-hour or 12-hour time and matching date formats. The language
+  follows your browser and is remembered.
+- **Installable and offline** on Android, iOS and desktop.
 
-Most time-tracking and habit applications force users into cloud subscriptions, selling analytics or risking privacy. **Activity Log** is engineered as a **Local-First Software** application:
+## Privacy
 
-1. **Client-Side Sovereignty**: Data lives strictly in the browser's structured IndexedDB storage engine.
-2. **Instant Reactive Updates**: Dexie live queries (`dexie-react-hooks`) provide frictionless UI state sync across tabs.
-3. **Data Compression & Portability**: State can be exported, backed up to JSON, or compressed into URL fragments via `lz-string` for cross-device peer sharing without centralized databases.
-4. **Print & PDF Optimization**: Includes dedicated CSS `@media print` rules designed to render a complete week of activities on a single clean printable page.
+Data never leaves the device unless you export or share it yourself. There is no backend,
+analytics or tracking. "Reset app" deletes the local database.
 
----
+## Development
 
-## 🚀 Key Features
+Requires Node.js 20+.
 
-- **Interactive Weekly Calendar**: Hourly grid visualization showing daily tasks, intervals, and routines at a glance.
-- **Multi-User Profile Switching**: Effortlessly manage and switch between distinct user profiles or workspaces locally.
-- **Real-Time Data Persistence**: Low-latency ACID-compliant transactions powered by IndexedDB through Dexie.js.
-- **Compressed P2P Sharing**: Share specific activity schedules via compressed URL payloads using LZ-string encoding.
-- **Internationalization (i18n)**: Native multilingual architecture powered by `i18next` and `react-i18next`.
-- **Installable PWA**: Works completely offline on iOS, Android, macOS, Linux, and Windows with Service Worker caching.
-- **Automated CI/CD**: GitHub Actions workflow automatically verifies builds and deploys directly to Cloudflare Pages edge network on every commit.
-
----
-
-## 🛠️ Architecture Overview
-
-```mermaid
-flowchart TD
-    User["User Interaction"] --> UI["React 19 View Layer (TypeScript)"]
-    
-    subgraph Client Application ["Client-Side Browser Environment"]
-        UI --> Hooks["dexie-react-hooks / Custom State"]
-        Hooks --> DexieDB["Dexie.js ORM Layer"]
-        DexieDB --> IndexedDB[("Browser IndexedDB Engine\n(users, activities, categories)")]
-        
-        UI --> ShareEngine["Sharing & Export Engine"]
-        ShareEngine --> LZString["LZ-String Compression"]
-        LZString --> URLHash["Compressed URL Fragment / JSON Backup"]
-        
-        UI --> PrintEngine["Print & PDF Formatter (@media print)"]
-        PrintEngine --> PrintDoc["1-Page Weekly Summary Sheet"]
-        
-        UI --> I18n["i18next Translation Layer"]
-    end
-    
-    GitPush["Git Commit to Main"] --> GHAction["GitHub Actions Pipeline"]
-    GHAction --> CFDeploy["Cloudflare Pages CDN Edge Distribution"]
-```
-
----
-
-## 💻 Tech Stack
-
-| Domain | Technology |
-| :--- | :--- |
-| **Frontend Framework** | React 19, Modern TypeScript 5 |
-| **Build & Bundler** | Vite 8 with `@vitejs/plugin-react` |
-| **Storage Engine** | IndexedDB via Dexie.js 4 & `dexie-react-hooks` |
-| **Date & Time** | `date-fns` 4 |
-| **Localization** | `i18next` & `react-i18next` |
-| **Compression** | `lz-string` |
-| **PWA & Service Worker** | `vite-plugin-pwa` (Workbox) |
-| **Icons & UI** | Lucide React, Modern CSS Modules |
-| **CI/CD** | GitHub Actions & Cloudflare Pages |
-
----
-
-## 🚦 Getting Started
-
-### Prerequisites
-- Node.js (v18+)
-- npm or yarn
-
-### Installation
 ```bash
-# Clone the repository
-git clone https://github.com/Etherdancer/activity-log-pwa.git
-
-# Navigate to project folder
-cd activity-log-pwa
-
-# Install dependencies
 npm install
-
-# Run development server
-npm run dev
+npm run dev       # http://localhost:5173
+npm run lint      # ESLint (incl. React hooks rules)
+npm run build     # type-check + production build in dist/
+npm run preview   # serve the production build
 ```
 
-### Production Build & Linting
-```bash
-# Type check and build production distribution
-npm run build
+| Path | What it is |
+| --- | --- |
+| `src/App.tsx` | Top bar, person selection, print flow |
+| `src/components/WeeklyCalendar.tsx` | Week grid, lane layout for overlapping activities |
+| `src/components/ActivityModal.tsx` | Add/edit form with overlap warning |
+| `src/components/ExportModal.tsx`, `ImportResolverModal.tsx`, `ImportLinkModal.tsx` | Sharing and importing |
+| `src/utils/importData.ts` | Validation of untrusted import data |
+| `src/db/database.ts` | Dexie (IndexedDB) schema |
+| `src/i18n.ts` | Croatian and English strings |
 
-# Run ESLint validation
-npm run lint
+Pushes to `master` are linted, built and deployed to Cloudflare Pages by
+[`.github/workflows/deploy.yml`](.github/workflows/deploy.yml); pull requests are checked by
+[`ci.yml`](.github/workflows/ci.yml).
 
-# Preview build locally
-npm run preview
-```
+## License
 
----
-
-## 📄 License
-
-This project is licensed under the [MIT License](LICENSE).
+[MIT](LICENSE) © Etherdancer

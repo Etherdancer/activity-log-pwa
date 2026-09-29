@@ -238,3 +238,8 @@
     font-size: 0.65rem;
   }
 }
+
+.calendar-nav .today-btn {
+  padding: 0.5rem 0.75rem;
+  font-weight: 600;
+}

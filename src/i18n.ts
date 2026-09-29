@@ -10,6 +10,17 @@ const resources = {
       "add_activity": "Dodaj Aktivnost",
       "edit_activity": "Uredi Aktivnost",
       "delete_activity": "Obriši Aktivnost",
+      "delete_activity_confirm": "Obrisati ovu aktivnost?",
+      "activity_count_one": "{{count}} aktivnost",
+      "activity_count_few": "{{count}} aktivnosti",
+      "activity_count_other": "{{count}} aktivnosti",
+      "save_failed": "Spremanje nije uspjelo",
+      "end_after_start": "Završetak mora biti nakon početka",
+      "previous_week": "Prethodni tjedan",
+      "next_week": "Sljedeći tjedan",
+      "today": "Danas",
+      "hour_range_invalid": "Završni sat mora biti nakon početnog",
+      "select_user": "Odaberi korisnika",
       "rename_user": "Preimenuj korisnika",
       "now": "Sada",
       "export_data": "Izvezi Podatke",
@@ -90,6 +101,18 @@ const resources = {
       "add_activity": "Add Activity",
       "edit_activity": "Edit Activity",
       "delete_activity": "Delete Activity",
+      "date": "Date",
+      "time": "Time",
+      "delete_activity_confirm": "Delete this activity?",
+      "activity_count_one": "{{count}} activity",
+      "activity_count_other": "{{count}} activities",
+      "save_failed": "Could not save",
+      "end_after_start": "End time must be after the start time",
+      "previous_week": "Previous week",
+      "next_week": "Next week",
+      "today": "Today",
+      "hour_range_invalid": "End hour must be after the start hour",
+      "select_user": "Select person",
       "save": "Save",
       "cancel": "Cancel",
       "title": "Title",
@@ -168,11 +191,29 @@ const resources = {
   }
 };
 
+const LANG_KEY = 'language';
+const SUPPORTED = ['hr', 'en'];
+
+/** Saved choice, else the browser language, else Croatian. */
+function initialLanguage(): string {
+  try {
+    const saved = localStorage.getItem(LANG_KEY);
+    if (saved && SUPPORTED.includes(saved)) return saved;
+  } catch { /* storage unavailable */ }
+  const browser = (navigator.language || 'hr').slice(0, 2).toLowerCase();
+  return browser === 'en' ? 'en' : 'hr';
+}
+
+i18n.on('languageChanged', lng => {
+  document.documentElement.lang = lng;
+  try { localStorage.setItem(LANG_KEY, lng); } catch { /* storage unavailable */ }
+});
+
 i18n
   .use(initReactI18next) // passes i18n down to react-i18next
   .init({
     resources,
-    lng: "hr", // default language
+    lng: initialLanguage(),
     fallbackLng: "en",
     interpolation: {
       escapeValue: false // react already safes from xss

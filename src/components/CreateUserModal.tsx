@@ -6,7 +6,7 @@ import './ActivityModal.css'; // Reusing modal CSS
 interface CreateUserModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onCreated: () => void;
+  onCreated: (id: number) => void;
 }
 
 export function CreateUserModal({ isOpen, onClose, onCreated }: CreateUserModalProps) {
@@ -26,8 +26,8 @@ export function CreateUserModal({ isOpen, onClose, onCreated }: CreateUserModalP
         <div className="modal-body" style={{ padding: 0 }}>
           {/* We wrap CreateUser. CreateUser has its own padding/styling but fits here */}
           <CreateUser 
-            onCreated={() => {
-              onCreated();
+            onCreated={(id) => {
+              onCreated(id);
               onClose();
             }} 
           />

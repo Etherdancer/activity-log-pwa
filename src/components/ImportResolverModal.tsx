@@ -1,162 +1,97 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, Download, AlertTriangle } from 'lucide-react';
 import { db, type Activity } from '../db/database';
+import { type ExportPayload, newId, sameActivity } from '../utils/importData';
+import { activitySpan } from '../utils/time';
 
 interface ImportResolverModalProps {
-  isOpen: boolean;
-  importData: any | null; // The parsed JSON
+  /** Validated import data (see parseImportPayload). Remount (key) for each new import. */
+  importData: ExportPayload;
   onClose: () => void;
 }
 
-export function ImportResolverModal({ isOpen, importData, onClose }: ImportResolverModalProps) {
+type Resolution = 'keep_device' | 'keep_imported' | 'merge';
+type Conflict = { incoming: Activity; existing: Activity };
+
+export function ImportResolverModal({ importData, onClose }: ImportResolverModalProps) {
   const { t } = useTranslation();
   const [step, setStep] = useState<'confirm' | 'conflict' | 'processing'>('confirm');
-  const [conflicts, setConflicts] = useState<{ incoming: Activity; existing: Activity }[]>([]);
-  const [targetUserId, setTargetUserId] = useState<number | null>(null);
-
-  useEffect(() => {
-    if (isOpen && importData) {
-      setStep('confirm');
-      setConflicts([]);
-      setTargetUserId(null);
-    }
-  }, [isOpen, importData]);
+  const [pending, setPending] = useState<{ userId: number; incoming: Activity[]; conflicts: Conflict[] } | null>(null);
 
   const detectConflicts = async () => {
-    if (!importData) return;
     setStep('processing');
-    
     try {
-      // Check if user exists
       const allUsers = await db.users.toArray();
-      const existingUser = allUsers.find(u => 
-        u.firstName === importData.user.firstName && 
-        u.lastName === importData.user.lastName
+      const existingUser = allUsers.find(u =>
+        u.firstName === importData.user.firstName && u.lastName === importData.user.lastName
       );
+      const userId = existingUser?.id ?? (await db.users.add({ ...importData.user })) as number;
 
-      let tUserId: number;
-      if (existingUser && existingUser.id !== undefined) {
-        tUserId = existingUser.id!;
-      } else {
-        // User doesn't exist, so no conflicts are possible
-        tUserId = (await db.users.add({
-          firstName: importData.user.firstName,
-          lastName: importData.user.lastName,
-          colorTheme: importData.user.colorTheme || 'ocean',
-          createdAt: importData.user.createdAt || Date.now()
-        })) as number;
-        setTargetUserId(tUserId);
-        await executeImport(tUserId, importData.activities, 'keep_imported', []);
-        return;
-      }
-      
-      setTargetUserId(tUserId);
+      // Give every incoming activity an id up front, so conflict handling can refer to it.
+      const incomingAll: Activity[] = importData.activities.map(a => ({ ...a, id: a.id || newId(), userId }));
+      const existing = existingUser ? await db.activities.where('userId').equals(userId).toArray() : [];
 
-      // Fetch existing activities for this user
-      const existingActivities = await db.activities.where('userId').equals(tUserId).toArray();
-      
-      const parseTime = (t: string) => { 
-        if (!t) return 0;
-        const [h,m] = t.split(':').map(Number); 
-        return h * 60 + (m || 0); 
-      };
+      // Exact duplicates (e.g. importing the same export twice) are skipped, not duplicated.
+      const incoming = incomingAll.filter(inc => !existing.some(ex => sameActivity(ex, inc)));
 
-      const foundConflicts: { incoming: Activity; existing: Activity }[] = [];
-      
-      importData.activities.forEach((inc: any) => {
-        const incStart = parseTime(inc.startTime);
-        let incEnd = incStart + 60;
-        if (inc.endTime) {
-          incEnd = parseTime(inc.endTime);
-          if (incEnd < incStart) incEnd += 24 * 60;
-        }
-
-        // Find an existing activity that intersects in time
-        const overlap = existingActivities.find(ex => {
-          if (ex.date !== inc.date) return false;
-          
-          const exStart = parseTime(ex.startTime);
-          let exEnd = exStart + 60;
-          if (ex.endTime) {
-            exEnd = parseTime(ex.endTime);
-            if (exEnd < exStart) exEnd += 24 * 60;
-          }
-
-          // Check intersection
-          return incStart < exEnd && exStart < incEnd;
+      const conflicts: Conflict[] = [];
+      for (const inc of incoming) {
+        const i = activitySpan(inc.startTime, inc.endTime);
+        const overlap = existing.find(ex => {
+          if (ex.date !== inc.date || ex.id === inc.id) return false;
+          const e = activitySpan(ex.startTime, ex.endTime);
+          return i.start < e.end && e.start < i.end;
         });
+        if (overlap) conflicts.push({ incoming: inc, existing: overlap });
+      }
 
-        if (overlap) {
-          // If they are exactly the same, it's not a conflict we care about (just ignore or overwrite it)
-          if (overlap.startTime !== inc.startTime || overlap.endTime !== inc.endTime || overlap.description !== inc.description) {
-            foundConflicts.push({ incoming: inc, existing: overlap });
-          }
-        }
-      });
-
-      if (foundConflicts.length > 0) {
-        setConflicts(foundConflicts);
+      if (conflicts.length > 0) {
+        setPending({ userId, incoming, conflicts });
         setStep('conflict');
       } else {
-        await executeImport(tUserId, importData.activities, 'keep_imported', []);
+        await executeImport(incoming, 'keep_imported', []);
       }
     } catch (e) {
       console.error(e);
-      alert(t('import_failed') || 'Import failed');
+      alert(t('import_failed'));
       onClose();
     }
   };
 
-  const executeImport = async (userId: number, incomingData: any[], resolution: 'keep_device' | 'keep_imported' | 'merge', currentConflicts: { incoming: Activity; existing: Activity }[]) => {
+  const executeImport = async (incoming: Activity[], resolution: Resolution, conflicts: Conflict[]) => {
+    setStep('processing');
     try {
-      setStep('processing');
-      let activitiesToInsert = incomingData.map(a => ({
-        ...a,
-        userId: userId,
-        id: a.id || ((typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).substring(2, 10))
-      }));
-
-      if (currentConflicts.length > 0) {
+      let toInsert = incoming;
+      const conflictIncomingIds = new Set(conflicts.map(c => c.incoming.id));
+      await db.transaction('rw', db.activities, async () => {
         if (resolution === 'keep_device') {
-          // Filter out incoming activities that are in conflicts
-          const conflictIncomingIds = new Set(currentConflicts.map(c => c.incoming.id));
-          activitiesToInsert = activitiesToInsert.filter(a => !conflictIncomingIds.has(a.id));
+          toInsert = incoming.filter(a => !conflictIncomingIds.has(a.id));
         } else if (resolution === 'keep_imported') {
-          // Delete the old existing activities that are conflicting
-          const existingIdsToDelete = currentConflicts.map(c => c.existing.id!);
-          await db.activities.bulkDelete(existingIdsToDelete);
-        } else if (resolution === 'merge') {
-          // Just insert them, but give incoming ones a brand new UUID so they don't overwrite if they happen to share UUID
-          activitiesToInsert = activitiesToInsert.map(a => {
-            const isConflict = currentConflicts.some(c => c.incoming.id === a.id);
-            if (isConflict) {
-              return { ...a, id: (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).substring(2, 10) }; // Ensure they coexist side-by-side
-            }
-            return a;
-          });
+          await db.activities.bulkDelete(conflicts.map(c => c.existing.id!));
+        } else {
+          // Merge: keep both side by side; fresh ids so nothing is overwritten.
+          toInsert = incoming.map(a => (conflictIncomingIds.has(a.id) ? { ...a, id: newId() } : a));
         }
-      }
-
-      await db.activities.bulkPut(activitiesToInsert);
-      alert(t('import_success') || 'Import successful');
+        await db.activities.bulkPut(toInsert);
+      });
+      alert(t('import_success'));
       onClose();
-      window.location.reload();
     } catch (e) {
       console.error(e);
-      alert(t('import_failed') || 'Import failed');
+      alert(t('import_failed'));
       onClose();
     }
   };
 
-  if (!isOpen || !importData) return null;
+  const resolve = (r: Resolution) => pending && executeImport(pending.incoming, r, pending.conflicts);
 
   return (
     <div className="modal-overlay" style={{ zIndex: 400 }}>
-      <div className="modal-content" style={{ maxWidth: '400px' }}>
+      <div className="modal-content" style={{ maxWidth: '400px' }} role="dialog" aria-modal="true">
         <div className="modal-header">
           <h3>{step === 'conflict' ? t('import_conflict_title') : t('incoming_data_title')}</h3>
-          <button className="close-btn" onClick={onClose} disabled={step === 'processing'}>
+          <button className="close-btn" onClick={onClose} disabled={step === 'processing'} aria-label={t('cancel')}>
             <X size={20} />
           </button>
         </div>
@@ -168,7 +103,7 @@ export function ImportResolverModal({ isOpen, importData, onClose }: ImportResol
                 {t('incoming_data_desc')} <strong>{importData.user.firstName} {importData.user.lastName}</strong>?
               </p>
               <p style={{ marginTop: '0.5rem', color: 'var(--color-surface-500)', fontSize: '0.9rem' }}>
-                ({importData.activities.length} activities)
+                ({t('activity_count', { count: importData.activities.length })})
               </p>
             </>
           )}
@@ -176,37 +111,24 @@ export function ImportResolverModal({ isOpen, importData, onClose }: ImportResol
           {step === 'processing' && (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', padding: '2rem 0' }}>
               <div className="spinner" style={{ width: '40px', height: '40px', border: '3px solid var(--color-surface-200)', borderTopColor: 'var(--color-primary-500)', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
-              <p style={{ fontWeight: 500 }}>{t('importing_data') || 'Processing...'}</p>
+              <p style={{ fontWeight: 500 }}>{t('importing_data')}</p>
             </div>
           )}
 
-          {step === 'conflict' && (
+          {step === 'conflict' && pending && (
             <>
               <AlertTriangle size={48} style={{ color: 'var(--color-warning)', margin: '0 auto 1rem auto' }} />
               <p style={{ margin: 0, fontSize: '1rem', marginBottom: '1.5rem', color: 'var(--text-main)' }}>
-                {t('import_conflict_desc', { count: conflicts.length })}
+                {t('import_conflict_desc', { count: pending.conflicts.length })}
               </p>
-              
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                <button 
-                  className="btn-secondary" 
-                  style={{ justifyContent: 'center', whiteSpace: 'normal', height: 'auto', padding: '0.75rem' }}
-                  onClick={() => executeImport(targetUserId!, importData.activities, 'keep_device', conflicts)}
-                >
+                <button className="btn-secondary" style={{ justifyContent: 'center', whiteSpace: 'normal', height: 'auto', padding: '0.75rem' }} onClick={() => resolve('keep_device')}>
                   {t('conflict_keep_device')}
                 </button>
-                <button 
-                  className="btn-primary" 
-                  style={{ justifyContent: 'center', whiteSpace: 'normal', height: 'auto', padding: '0.75rem' }}
-                  onClick={() => executeImport(targetUserId!, importData.activities, 'keep_imported', conflicts)}
-                >
+                <button className="btn-primary" style={{ justifyContent: 'center', whiteSpace: 'normal', height: 'auto', padding: '0.75rem' }} onClick={() => resolve('keep_imported')}>
                   {t('conflict_keep_imported')}
                 </button>
-                <button 
-                  className="btn-secondary" 
-                  style={{ justifyContent: 'center', whiteSpace: 'normal', height: 'auto', padding: '0.75rem' }}
-                  onClick={() => executeImport(targetUserId!, importData.activities, 'merge', conflicts)}
-                >
+                <button className="btn-secondary" style={{ justifyContent: 'center', whiteSpace: 'normal', height: 'auto', padding: '0.75rem' }} onClick={() => resolve('merge')}>
                   {t('conflict_merge')}
                 </button>
               </div>

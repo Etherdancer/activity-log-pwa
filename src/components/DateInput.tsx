@@ -35,7 +35,9 @@ export function DateInput({ value, onChange }: DateInputProps) {
   };
 
   const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: 5 }, (_, i) => currentYear - 2 + i);
+  // Always include the value's own year, so older (or imported) entries stay editable.
+  const years = Array.from(new Set([...Array.from({ length: 5 }, (_, i) => currentYear - 2 + i), year]))
+    .sort((a, b) => a - b);
 
   const daySelect = (
     <select value={day} onChange={e => emit(parseInt(e.target.value, 10), month, year)} style={selectStyle}>

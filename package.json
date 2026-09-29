@@ -1,6 +1,6 @@
 {
   "name": "activity-log-pwa",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Privacy-first, local-first daily activity & habit tracking Progressive Web App with IndexedDB persistence and internationalization",
   "type": "module",
   "license": "MIT",
@@ -29,7 +29,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@types/lz-string": "^1.3.34",
     "date-fns": "^4.4.0",
     "dexie": "^4.4.4",
     "dexie-react-hooks": "^4.4.0",
